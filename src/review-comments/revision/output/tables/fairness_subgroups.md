@@ -1,0 +1,28 @@
+# Fairness and Subgroup Analysis (5-fold OOF predictions, XGBoost)
+
+| Objective | Subgroup attribute | Subgroup | n | F1-macro | FNR (positive class) | Brier score | Equalised-odds gap (FNR) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| CGPA Category | gender | Female | 574 | 0.458 | 0.964 | 0.182 | 0.012 |
+| CGPA Category | gender | Male | 804 | 0.425 | 0.952 | 0.188 | 0.012 |
+| CGPA Category | residence_type | RURAL | 370 | 0.436 | 0.966 | 0.187 | 0.014 |
+| CGPA Category | residence_type | URBAN | 1008 | 0.457 | 0.952 | 0.185 | 0.014 |
+| CGPA Category | family_income_bracket | 2.5 Lakh to 8 Lakh | 414 | 0.459 | 0.939 | 0.188 | 0.233 |
+| CGPA Category | family_income_bracket | 8 Lakh to 15 Lakh | 167 | 0.464 | 0.933 | 0.194 | 0.233 |
+| CGPA Category | family_income_bracket | Less than 2.5 Lakh | 737 | 0.441 | 0.983 | 0.182 | 0.233 |
+| CGPA Category | family_income_bracket | More than  15 Lakh | 60 | 0.515 | 0.75 | 0.187 | 0.233 |
+| At-Risk | gender | Female | 574 | 0.612 | 0.715 | 0.171 | 0.143 |
+| At-Risk | gender | Male | 804 | 0.641 | 0.572 | 0.226 | 0.143 |
+| At-Risk | residence_type | RURAL | 370 | 0.6 | 0.701 | 0.219 | 0.115 |
+| At-Risk | residence_type | URBAN | 1008 | 0.652 | 0.586 | 0.197 | 0.115 |
+| At-Risk | family_income_bracket | 2.5 Lakh to 8 Lakh | 414 | 0.674 | 0.548 | 0.192 | 0.249 |
+| At-Risk | family_income_bracket | 8 Lakh to 15 Lakh | 167 | 0.671 | 0.587 | 0.186 | 0.249 |
+| At-Risk | family_income_bracket | Less than 2.5 Lakh | 737 | 0.604 | 0.678 | 0.216 | 0.249 |
+| At-Risk | family_income_bracket | More than  15 Lakh | 60 | 0.704 | 0.429 | 0.159 | 0.249 |
+| Career Ready | gender | Female | 574 | 0.706 | 0.423 | 0.199 | 0.009 |
+| Career Ready | gender | Male | 804 | 0.688 | 0.414 | 0.219 | 0.009 |
+| Career Ready | residence_type | RURAL | 370 | 0.719 | 0.327 | 0.208 | 0.128 |
+| Career Ready | residence_type | URBAN | 1008 | 0.684 | 0.455 | 0.212 | 0.128 |
+| Career Ready | family_income_bracket | 2.5 Lakh to 8 Lakh | 414 | 0.709 | 0.413 | 0.197 | 0.133 |
+| Career Ready | family_income_bracket | 8 Lakh to 15 Lakh | 167 | 0.673 | 0.527 | 0.211 | 0.133 |
+| Career Ready | family_income_bracket | Less than 2.5 Lakh | 737 | 0.694 | 0.394 | 0.218 | 0.133 |
+| Career Ready | family_income_bracket | More than  15 Lakh | 60 | 0.656 | 0.478 | 0.218 | 0.133 |

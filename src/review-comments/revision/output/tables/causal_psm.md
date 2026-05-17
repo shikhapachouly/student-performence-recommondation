@@ -1,0 +1,9 @@
+# Propensity-Score Matching for top modifiable features.
+ATT is the Average Treatment Effect on the Treated; outcome = current_cgpa.
+Note: observational; not a substitute for randomised intervention evidence.
+
+| Treatment | n treated | n matched (1:1, caliper 0.2 SD) | ATT (CGPA points) | 95% bootstrap CI | CI excludes 0 |
+| --- | --- | --- | --- | --- | --- |
+| Workshop participation | 1057 | 0 | n/a | n/a | no acceptable matches within caliper |
+| High peer-group quality (>= 4 of 5) | 117 | 10 | +0.166 | [-0.958, +1.417] | no |
+| Stress coping | 505 | 414 | +0.081 | [-0.062, +0.225] | no |

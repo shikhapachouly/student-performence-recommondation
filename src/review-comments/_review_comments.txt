@@ -1,0 +1,81 @@
+﻿
+International Journal of Intelligent Engineering and Systems (IJIES)
+Paper ID
+20262542
+Paper Title
+Explainable AI for Student Success: A Multi-Objective Framework with SHAP-Based Personalized Recommendations
+
+Recommendation for Publication
+☐ Accept                   　     ☐ Accept after Minor Revision
+☒ Accept after Major Revision         ☐ Reject
+1st Reviewer’s comment:
+
+The core idea is to combine multi-objective student success prediction with SHAP-based, personalized recommendations focused on modifiable factors. This is practically valuable for academic advising and compares several ML and DL models fairly. However, the contribution is more integrative than fundamentally novel, the intervention logic is not causally validated, and reproducibility details are incomplete, especially for preprocessing, tuning, and data availability. 
+The problem definition of this work is not clear. In Sect. 2, the drawbacks (Not limitation = research depth) of each conventional technique should be described. The authors should emphasize the difference with other methods to clarify the position of this work further.
+To help readers’ understanding, the authors should add a notation list, because there are many variables in equations.
+The presentation of figures is not professional. In figures, letters are small and blurry. The authors should enlarge or redraw figures. See Fig. 3, 5, 7, etc. The proposed presentation does not respect the elementary rules of a scientific writing.
+The reviewer fails to understand the effectiveness of the proposed technique, because no comparison data with state-of-the-art methods is shown in this paper. In the comparison part, the authors should demonstrate the comparison data to confirm the validity of the obtained results. In-depth comparison and discussion with state-of-the-art methods proposed in 2024-2025 are necessary to clarify the effectiveness.
+The manuscript states that the dataset contains “50+ features” in the Abstract, but later states that “43 features span seven categories.” Table 2 also reports category counts summing to 40, not 43. The authors should reconcile the total number of raw features, engineered features, and final model-input features.
+Table 2 lists feature-category counts as 3 + 3 + 9 + 10 + 8 + 3 + 4 = 40, while the Total row reports 43. This is a direct numerical inconsistency. Please correct either the category counts or the total.
+The recommendation-feature taxonomy reports 16 modifiable, 6 contextual, and 19 immutable features, which sum to 41, not 43. This conflicts with the stated final feature count. Please clarify whether two features are unclassified or whether one of these numbers is incorrect.
+The text states that academic_index with SHAP = 0.126 is “3.800d7” more influential than tenth_percentage with SHAP = 0.033. The numerical ratio is approximately 3.82. The expression “3.800d7” appears erroneous and should be corrected.
+The text states that workshop participation with SHAP = 0.331 has a SHAP impact “6.600d7” larger than teamwork skills with SHAP = 0.050. The numerical ratio is approximately 6.62. The expression “6.600d7” appears erroneous and should be corrected.
+The manuscript states that transformer-based models have F1 = 0.41–0.58, but Table 4 shows the relevant FT-Transformer and SAINT F1-macro values range from 0.423 to 0.584. The rounded range should be reported consistently, for example 0.42–0.58.
+
+2nd Reviewer’s comment:
+
+The paper proposes a multi-objective XAI framework for student success prediction, covering CGPA category, at-risk status, and career readiness. It compares classical ML and tabular DL models, finds XGBoost strongest, and uses SHAP values to generate personalized recommendations based on modifiable student factors.
+The study does not directly compare the proposed method with the latest 2024+ XAI-based student performance or dropout prediction frameworks on a common dataset, common split, or reimplemented protocol. The literature table lists recent methods, but the experimental section evaluates only generic baselines and tabular architectures. This weakens the claim that the framework advances the state of the art. The authors should either remove superiority implications or add reproducible comparisons with recent SHAP-based ensemble, LightGBM/XGBoost, imbalance-learning, and recommendation-oriented EDM methods under the same evaluation protocol.
+The recommendation engine treats SHAP attribution as if it can support intervention prioritization, but SHAP only explains model predictions and does not establish causal effects. Recommending workshop participation, socialization, or stress coping as high-impact interventions may be misleading unless validated longitudinally or causally. The paper acknowledges this limitation, but the main claims still overstate practical effectiveness. The authors should reframe recommendations as hypothesis-generating decision support and add causal validation, propensity-score analysis, ablation, or prospective intervention evidence.
+Reproducibility is insufficient for a middle-tier empirical ML paper. Although the paper reports CV, SMOTE, Optuna, and some model settings, it omits the complete hyperparameter search spaces, final best parameters per objective, preprocessing mappings, feature-generation code, SMOTE parameters, fold indices, software versions, and exact availability conditions for the dataset. “Available upon request” is weaker than reproducible release. The authors should provide a complete replication package or, at minimum, pseudo-code and configuration tables sufficient to reproduce all tables.
+There is a potential target-leakage concern. CGPA and backlog-related variables are used to define academic and at-risk labels, while academic_index includes CGPA and prior academic marks. If CGPA or strongly label-defining variables remain in predictors for CGPA category or at-risk prediction, the task may become partially circular. The authors must clearly list excluded target-derived variables for each objective and report leakage-free ablations.
+The fairness and generalizability analysis is underdeveloped. Gender appears among top SHAP features, but the paper does not evaluate subgroup performance, calibration, disparate error rates, or whether recommendations differ unfairly across demographic or socioeconomic groups. Since this is an educational decision-support system, fairness analysis is not optional. The authors should report subgroup F1, false-negative rates for at-risk students, calibration, and mitigation strategies.
+The comparison with deep learning models may not be fully fair. The dataset is small, but the manuscript does not provide enough detail on optimization, early stopping, batch size, epochs, learning-rate schedules, categorical embeddings, or regularization for TabNet, FT-Transformer, and SAINT. Poor DL performance may reflect implementation or tuning limitations rather than a reliable conclusion. The authors should include full DL training settings and comparable tuning budgets.
+
+From Editor：
+
+* * Please send your revised manuscript with the response letter for the 2nd review. (Please highlight modifications and additions inside the paper by red font.)
+
+Please set the font size of all sentences to 11pt and the font size of all tables to 10pt.
+For wide figures, please use a one-column format.
+Please do not place two figures side by side in one column.
+Please add “Conflicts of Interest” and “Author Contributions”. (see the IJIES format.docx)
+
+Conflicts of Interest (Mandatory)
+Declare conflicts of interest or state “The authors declare no conflict of interest.” Authors must identify and declare any personal circumstances or interest that may be perceived as inappropriately influencing the representation or interpretation of reported research results. 
+
+Author Contributions (Mandatory)
+For research articles with several authors, a short paragraph specifying their individual contributions must be provided. The following statements should be used as follows: “conceptualization, XXX and YYY; methodology, XXX; software, XXX; validation, XXX, YYY, and ZZZ; formal analysis, XXX; investigation, XXX; resources, XXX; data curation, XXX; writing—original draft preparation, XXX; writing—review and editing, XXX; visualization, XXX; supervision, XXX; project administration, XXX; funding acquisition, YYY”, etc. Authorship must be limited to those who have contributed substantially to the work reported.
+
+Please check the format of your manuscript according to the following:
+Format Check Point
+The Standard number of pages is 8. Please extend your manuscript further if your manuscript is less than 8 pages. Otherwise, we never publish your paper.
+Do not use the abbreviation in authors’ name and affiliations. Do not use acronym.
+Do not use the same affiliation repeatedly.
+Delete title, such as Dr. etc., in Affiliations and Author names.
+Do not use figures instead of tables/equations. Furthermore, all tables/equations must be original.
+In figures/tables, unify the font size of letters (more than 10pt). If the letters small, redraw the figure/table.
+Do not insert (a), (b), (c), etc. into figures.
+In equations, unify the font size to 11pt.
+All figures must be clear. The blurred image is not acceptable. Furthermore, all figures must be original.
+Do not put borders around the outside of your figures. 
+Figures (refer with: Fig. 1, Fig. 2, ...) and Tables (refer with: Table 1, Table 2, …) should be presented as part of the text, leaving enough space so that the caption will not be confused with the text.
+Figures and tables must be located in the top or bottom of each column.
+Do not rotate the sheet.
+Do not use vertical writing.
+Do not divide figure/tables into 2 pages.
+Equations (refer with: Eq. (1), Eq. (2), ...) should be indented 5 mm. There should be one line of space above the equation and one line of space below it before the text continues.
+Align equation numbers.
+In sentences/equations, mathematical expressions must be Italic font.
+Don’t use equation environment such as Microsoft Math environment in sentences.
+Don’t use “*” in equations. Distinguish mathematical expression from programming code.
+When you cite some references in sentences, please give numbers, such as [1]. Two or more references at a time must be put in one set of brackets [2-4]. 
+Improve the reference format. This is very important for indexing service. If the authors do not follow the following rule, we never publish the papers.
+e.g.
+[1] R. Ruskone, S. Airault, and O. Jamet, “Vehicle Detection on Aerial Images”, International Journal of Intelligent Engineering and Systems, Vol.1, No.1, pp.123-456, 2009. 
+(In the case of Journal Papers)
+[2] R. Ruskone, L. Guigues, S. Airault, and O. Jamet, “Vehicle Detection on Aerial Images”, In: Proc. of International Conf. On Pattern Recognition, Vienna, Austria, pp.900-904, 1996. 
+(In the case of Conference Proceedings)
+*Note: e.g. In the case of the author name:"John Doe", express as "J. Doe". ("John" is the first name and "Doe" is the family name.)
+Evaluation of Paper
+

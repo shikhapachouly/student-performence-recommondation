@@ -1,0 +1,10 @@
+# Corrected recommendation-feature taxonomy. Counts are derived from src/config.py and reconcile to the actual feature matrix (42 columns).
+
+| Tier | Count | Examples |
+| --- | --- | --- |
+| Modifiable | 12 | daily_study_hours, extracurricular_support, workshop_seminar_participation_yn, community_service_yn, communication_skills_scale_1to5 … |
+| Contextual | 3 | internet_access, health_status_scale_1to5, stress_frequency_scale_1to5 |
+| Immutable | 22 | gender, institute_name, residence_type, tenth_percentage, twelth_percentage … |
+| Engineered | 5 | academic_index, skills_index, engagement_score, study_stress_interaction, skills_study_interaction |
+| Unclassified (review) | 0 |  |
+| **Total** | 42 |  |

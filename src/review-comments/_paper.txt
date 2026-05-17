@@ -1,0 +1,595 @@
+﻿
+Explainable AI for Student Success: A Multi-Objective Framework with SHAP-Based Personalized Recommendations
+Shikha Pachouly1*          D.S. Bormane2
+1Department of Computer Engineering, AISSMS College of Engineering, SPPU, Pune 411001, India
+2Department of Electronics and Telecommunication Engineering, AISSMS College of Engineering, SPPU, Pune 411001, India
+* Corresponding author’s Email: shikhaphd2022@gmail.com
+
+Abstract: Proactive identification of students who need academic support, combined with personalized intervention strategies, is essential for improving outcomes in higher education. This study proposes an end-to-end Explainable AI (XAI) framework that addresses three critical educational objectives simultaneously: (1) academic performance assessment—classifying students into Low, Medium, and High CGPA categories; (2) at-risk student identification—detecting students likely to struggle academically (CGPA below 7.0 or carrying backlogs); and (3) career readiness evaluation—assessing whether a student is prepared to start their professional career, measured through completion of internships and academic projects. Using a dataset of 1,378 engineering students with 50+ features spanning academic, demographic, behavioral, and socioeconomic dimensions, we develop a feature engineering pipeline that creates composite indicators (academic_index, skills_index, engagement_score) and interaction features. Seven models—four machine learning (Logistic Regression, Random Forest, SVM, XGBoost) and three deep learning (TabNet, FT-Transformer, SAINT)—are systematically compared using 5-fold stratified cross-validation with SMOTE-based class imbalance handling and Optuna hyperparameter optimization. XGBoost achieves the best performance with F1-macro of 0.805 (±0.017) for academic assessment, 0.767 (±0.040) for at-risk identification, and 0.699 (±0.024) for career readiness. SHAP (SHapley Additive exPlanations) analysis reveals that the engineered academic_index is the strongest predictor of academic outcomes, while engagement_score drives career readiness. A SHAP-based recommendation engine translates these insights into personalized, actionable interventions—for example, workshop participation shows a SHAP impact of +0.331 for at-risk students, making it the highest-leverage intervention. The framework provides educators and academic advisors with transparent, evidence-based tools for student support.
+Keywords: Student Performance Prediction, Explainable AI, SHAP, XGBoost, At-Risk Identification, Career Readiness, Feature Engineering, Recommendation System, Educational Data Mining
+
+1. Introduction
+1.1 Background and Motivation
+The rapid expansion of higher education enrollment globally has created unprecedented challenges for academic institutions in monitoring, supporting, and guiding individual student performance. According to UNESCO, global tertiary enrollment surpassed 235 million students in 2023, placing immense pressure on institutional resources for academic advising and support services. Traditional approaches to student monitoring—relying on aggregate statistics, periodic grade reviews, and manual advisor interventions—fail to capture the complex, multi-factorial nature of student success.
+Machine learning (ML) offers a data-driven alternative capable of identifying patterns in student data that human advisors might miss. However, recent systematic reviews of educational prediction models show that many educational data mining (EDM) studies remain “prediction-focused”—building models that predict outcomes without explaining the underlying factors. This “black box” approach fundamentally limits the practical utility of predictive models in education, where stakeholders (faculty, advisors, and administrators) need to understand why a student is at risk before they can design effective interventions [1].
+Explainable Artificial Intelligence (XAI) addresses this critical limitation by combining predictive power with interpretability. Recent explainable dropout and student-performance studies use SHAP (SHapley Additive exPlanations) to provide feature attributions at both global (population-level) and local (individual student) levels, making it particularly suitable for educational applications where personalized understanding is paramount [2]. Unlike simpler feature importance methods (e.g., Gini importance in Random Forest), SHAP-style explanations support local accuracy, consistency, and additivity—properties essential for trustworthy educational decision support.
+1.2 Problem Statement
+Student success is inherently multi-dimensional, yet existing prediction systems typically address only a single aspect. A comprehensive student support framework must simultaneously answer three questions that educators face daily:
+How is this student performing academically? Accurate classification of students by academic performance level (e.g., CGPA categories) enables differentiated support—remedial assistance for struggling students and enrichment opportunities for high performers.
+Is this student at risk of academic failure? Early identification of at-risk students—those with declining grades or accumulated backlogs—enables proactive intervention before academic problems become irreversible.
+Is this student prepared for their professional career? Evaluating career readiness—whether students have completed essential professional development milestones such as internships and academic projects—helps career services provide targeted guidance to those who need it most.
+Furthermore, predictions alone are insufficient. Educators require two additional capabilities: (a) transparent explanations of which factors drive each prediction, and (b) actionable recommendations specifying which modifiable student behaviors to target for improvement. Current systems provide predictions but leave educators to independently determine appropriate interventions—a gap this work explicitly addresses through a SHAP-based recommendation engine.
+
+1.3 Research Objectives
+This study addresses these challenges through three objectives:
+To propose a multi-objective performance prediction framework using data-driven target selection and Explainable AI, simultaneously predicting academic performance, at-risk status, and career readiness.
+To design and implement a SHAP-based recommendation engine that generates personalized, actionable suggestions targeting only modifiable student factors, with quantified expected impact.
+To systematically compare machine learning and deep learning approaches on educational tabular data, providing empirical guidance for model selection in educational contexts.
+1.4 Key Contributions
+The principal contributions of this work are:
+Multi-objective prediction framework: A unified framework addressing three actionable educational objectives—academic performance assessment (F1=0.805), at-risk identification (F1=0.767), and career readiness evaluation (F1=0.699)—each serving a distinct stakeholder need. To our knowledge, no prior study simultaneously addresses all three objectives.
+Domain-informed feature engineering: Composite scores (academic_index, skills_index, engagement_score) and interaction features (study_stress_interaction, skills_study_interaction) that emerged as the strongest predictors across all objectives, demonstrating that domain knowledge-driven feature design substantially outperforms raw survey features.
+SHAP-based recommendation engine: An automated system (Algorithm 1) that translates SHAP-derived feature attributions into personalized, actionable interventions. The engine uses a novel feasibility-weighted ranking score that balances feature impact with improvement headroom, and includes edge-case handling for uniform SHAP values and already-optimal students.
+Comprehensive ML vs. DL benchmark: Systematic evaluation of seven models—four ML (Logistic Regression, Random Forest, SVM, XGBoost) and three DL (TabNet, FT-Transformer, SAINT)—with Optuna Bayesian hyperparameter optimization, providing empirical evidence that XGBoost remains optimal for small educational tabular datasets ( 1,400 records).
+Reproducible end-to-end pipeline: A complete, open framework with documented random seeds covering data preprocessing, feature engineering, model training, explainability analysis, recommendation generation, and ready visualization.
+The remainder of this paper is organized as follows: Section 2 reviews related literature and identifies research gaps. Section 3 describes the proposed methodology including mathematical formulations. Section 4 details the experimental setup. Section 5 presents results and discussion. Section 6 concludes with findings and future work.
+2. Literature Review
+2.1 Student Performance Prediction Using Machine Learning
+Chen et al. [3] proposed an educational-data-mining approach for student performance prediction in IEEE Access, reinforcing the value of structured academic and behavioral features for early academic analytics. Recent systematic reviews by Al-Din and Al Abdulqader [4] and Kumari et al. [5] similarly report that tree-based and ensemble methods remain dominant in educational prediction studies, especially when institutional datasets contain mixed numerical and categorical variables.
+Alamgir et al. [6] showed that educational data mining on academic records can improve student-performance prediction when features are selected and evaluated carefully. Lou and Colvin [7] compared educational data mining methods on a large K-12 dataset and found that method choice depends strongly on the target outcome and data characteristics. Saeed [8] and Tao-Hongli [9] further emphasized feature selection and model evaluation as central steps in reliable educational prediction pipelines.
+Sarker et al. [10] analyzed student academic performance using educational data mining and highlighted the continued importance of interpretable predictors for institutional decision-making. Bettahi et al. [11] proposed a modular explainable dropout-prediction pipeline for higher education, while Yu et al. [12] demonstrated that semi-supervised feature selection can improve educational data mining for performance analysis.
+
+2.2 Explainable AI in Education
+The demand for transparency in educational AI has driven significant adoption of XAI techniques. Almalawi et al. [1] reviewed predictive models for educational purposes and identified interpretability as a recurring requirement for practical adoption. Kruger et al. [2] demonstrated an explainable machine-learning approach for student dropout prediction, showing how model explanations can support institutional interventions.
+Kalita et al. [13] combined Bi-LSTM prediction with SHAP-based interpretability and statistical validation for academic performance prediction. Paul et al. [14] analyzed student dropout and explainable academic-performance prediction using AI techniques, while Liu et al. [15] integrated ensemble learning with SHAP-based explainable AI for dropout analysis.
+Abukader et al. [16] proposed a metaheuristic-optimized LightGBM system with SHAP-based learning analytics for student performance prediction. Cabral et al. [17] reviewed AI-powered learning analytics dashboards and highlighted explainability and ethics as open challenges, while Takami et al. [18] developed personality-based explainable recommendations for trustworthy smart learning systems.
+A consistent finding across these studies is that while SHAP explanations improve interpretability, no existing system automatically translates SHAP values into personalized, actionable recommendations—leaving a critical "last mile" gap between explanation and intervention.
+2.3 Deep Learning for Tabular Educational Data
+Recent years have seen renewed interest in neural architectures for tabular data. Lin et al. [19] proposed Tab2Text as a framework for deep learning with tabular data, while Goldblum et al. [20] investigated when neural networks outperform boosted trees on tabular data. Hollmann et al. [21] introduced a tabular foundation model for accurate predictions on small data, showing that foundation-style tabular learning is becoming increasingly competitive.
+Despite these advances, the application of modern tabular DL architectures to educational data mining remains limited, particularly for small survey-style datasets. Fan and Waldmann [22] provided a comparative study of tabular deep learning architectures, and Yi et al. [23] demonstrated how XGBoost-based SHAP analysis can support interpretable prediction in an educational assessment setting. These recent studies motivate a direct benchmark between optimized classical ML and DL-style tabular models in the present work.
+2.4 Research Gap
+Table 1 summarizes the reviewed literature and identifies five specific gaps that this work addresses.
+Table 1. Summary of Related Work and Research Gaps
+Study
+Year
+Obj.
+XAI
+Recs
+Limitation
+Chen [3]
+2023
+1
+×
+×
+No XAI
+Al-Din [4]
+2024
+–
+×
+×
+Review only
+Kumari [5]
+2024
+–
+×
+×
+Review only
+Alamgir [6]
+2023
+1
+×
+×
+No XAI
+Lou [7]
+2025
+1
+×
+×
+No XAI
+Bettahi [11]
+2025
+1
+SHAP
+×
+Dropout only
+Kalita [13]
+2025
+1
+SHAP
+×
+GPA only
+Paul [14]
+2025
+1
+SHAP
+×
+Dropout focus
+Liu [15]
+2025
+1
+SHAP
+×
+Dropout only
+Abukader [16]
+2025
+1
+SHAP
+×
+Single obj.
+Takami [18]
+2023
+–
+XAI
+✓
+Learning recs
+Nassreddine [25]
+2025
+1
+SHAP
+×
+Single obj.
+This Work
+2026
+3
+SHAP
+✓
+Single inst.
+Identified gaps addressed by this study:
+Multi-objective prediction: All reviewed studies predict a single outcome (GPA, dropout, or pass/fail). No study simultaneously addresses academic performance, at-risk identification, and career readiness within a unified framework.
+From explanation to recommendation: While several studies apply SHAP for post-hoc explanation, none translate SHAP values into an automated recommendation engine that generates personalized interventions targeting only modifiable student factors.
+Domain-informed feature engineering: Most studies use raw survey or LMS features directly. The systematic creation of composite indicators (academic_index, engagement_score) and interaction features for educational data is unexplored.
+ML vs. DL on small educational data: No study provides a systematic comparison of TabNet, FT-Transformer, and SAINT against optimized ML baselines specifically on small educational survey datasets (<2,000 records).
+Reproducible end-to-end framework: Existing studies report results without providing a complete pipeline from preprocessing through explainability and recommendation generation.
+3. Proposed Methodology
+3.1 Framework Architecture
+The proposed framework, illustrated conceptually in Fig. 1, comprises seven sequential stages: (1) data ingestion and quality assessment, (2) domain-informed feature engineering, (3) Bayesian hyperparameter optimization, (4) ML baseline training, (5) DL model training, (6) multi-layered explainability analysis, and (7) personalized recommendation generation. Each stage is designed to be independently executable and reproducible.
+3.2 Problem Formulation
+Let  denote the student dataset where  is the feature vector for student  (), and  is the label for objective . We formulate three independent classification tasks:
+Objective 1—Academic Performance (3-class):
+(1)
+where g_i is the CGPA of student i.
+Objective 2—At-Risk Identification (binary):
+(2)
+where b_i ∈ 0,1 indicates backlog status.
+Objective 3—Career Readiness (binary):
+(3)
+where t_i indicates internship completion and p_i indicates academic project completion.
+For each objective k, we minimize the weighted cross-entropy loss:
+(4)
+where  is the number of classes,  is the predicted probability, and  is the inverse-frequency class weight to address class imbalance.
+3.3 Data Preprocessing Pipeline
+The dataset used in this study is a custom dataset created by the authors through a structured survey of 1,378 engineering students across five institutions affiliated with universities in Maharashtra and Madhya Pradesh, India. Data collection was conducted between July and September 2024 using validated Google Forms with built-in validation rules and mandatory field requirements. The survey instrument was developed through faculty expert consultation and validated by a certified psychiatrist for psychosocial scales (Cronbach's α > 0.78). Informed consent was obtained electronically, and all responses were anonymized.
+The dataset encompasses 52 features spanning academic performance (10th%, 12th%, CGPA, backlogs), demographics (gender, age, residence), family background (parental education, occupation, income), behavioral factors (study hours, extracurriculars, workshops), psychosocial indicators (communication, leadership, teamwork, stress, health on validated 1–5 Likert scales), and career outcomes. With only 0.29% missing data (4 values total), the dataset provides high-quality real-world student data.
+Preprocessing included: (a) standardization of inconsistent binary encodings and education labels across columns, (b) median imputation for the 4 missing numeric values, (c) ordinal encoding preserving natural category hierarchies, (d) binary 0,1 mapping for Yes/No columns, (e) label encoding for nominal categoricals, and (f) z-score normalization of continuous numerical features.
+3.4 Feature Engineering
+Five engineered features were designed based on educational domain knowledge to capture multi-dimensional student characteristics that individual raw survey responses cannot represent. The rationale is that academic success, skill development, and engagement are each composite constructs better measured by aggregating related indicators than by relying on any single variable:
+Definition 1 (Academic Index). Aggregate academic track record:
+(5)
+Definition 2 (Skills Index). Composite soft skills measure:
+(6)
+where r_j spans communication, leadership, teamwork, time management, and peer group quality self-assessment scales.
+Definition 3 (Engagement Score). Holistic participation measure:
+(7)
+where b_j indicates participation in extracurricular activities, workshops, community service, internships, and academic projects.
+Definition 4 (Interaction Features).
+(8)
+where h_i is daily study hours (mapped to ordinal 1,2,3,4) and σ_i is stress frequency. SSI captures the study-under-stress dynamic—a student studying long hours under high stress may have different outcomes than one studying the same hours with low stress. SKI combines skill level with study effort, reflecting the intuition that skilled students who also study diligently are most likely to succeed.
+Additionally, four low-variance columns were removed: age_group (98.9% single class), tobacco_use (99.1%), alcohol_use (98.5%), other_addictions (97.2%), as features with >97% single-class frequency provide negligible discriminatory power.
+3.5 Class Imbalance Handling
+Given the imbalanced class distributions (CGPA Low: 8.1%; At-risk: 28.4%), we apply SMOTE-style resampling, following recent optimized imbalanced-learning work for student dropout prediction [24], exclusively within training folds to prevent data leakage:
+(9)
+where  is a randomly selected k-nearest neighbor from the same minority class. This ensures synthetic samples lie on the line segment between existing minority samples, producing realistic interpolations. Critically, SMOTE is applied only within each training fold-never on validation or test data-to prevent data leakage that would inflate performance estimates. Class-weighted loss functions (Eq. 4) provide complementary imbalance mitigation by penalizing misclassification of minority classes more heavily.
+3.6 Model Architectures
+3.6.1 XGBoost (Primary Model)
+XGBoost-style gradient boosting constructs an additive ensemble of K regression trees and remains common in recent SHAP-based student-performance prediction studies [25]:
+(10)
+with the regularized objective at iteration t:
+(11)
+where  is the number of leaves,  represents leaf weights, and  control tree complexity.
+3.6.2 TabNet
+TabNet [19] employs sequential attention-based feature selection using sparsemax activation. At each decision step :
+(12)
+where  is the feature attention mask and  incorporates prior feature usage via relaxation factor . The final output aggregates across steps:
+(13)
+We use , , .
+3.6.3 FT-Transformer
+Transformer-style tabular models tokenize each feature into a learned embedding, consistent with recent tabular-data comparisons [20]:
+(14)
+A [CLS] token is prepended and the sequence is processed by L=2 Transformer encoder blocks with d_token=64 and attention dropout 0.2.
+3.6.4 SAINT
+SAINT [18] extends the transformer with dual attention:
+(15)
+(16)
+where intra-sample attention operates across features within each student, and inter-sample attention captures similarity patterns across the student batch. Configuration: d=32, depth=3, heads=4.
+3.6.5 Baseline ML Models
+Four classical ML models serve as baselines:
+Logistic Regression: 
+Random Forest: Ensemble of  bootstrapped decision trees
+SVM:  with RBF kernel
+XGBoost: As described in Section 3.6.1
+All use class-weighted loss functions for imbalance handling.
+3.7 SHAP Explainability Framework
+SHAP [12] computes the Shapley value for each feature j and instance:
+(17)
+satisfying local accuracy: , consistency, and missingness. Global importance is: .
+We employ TreeExplainer (exact, ) for tree-based models and KernelExplainer (model-agnostic) for DL models with 100-sample k-means background. TreeExplainer computes exact Shapley values in polynomial time by exploiting the tree structure, while KernelExplainer uses a weighted linear regression approximation suitable for any black-box model. For each of the three prediction objectives, we compute SHAP values for all seven models, enabling cross-model comparison of feature attributions.
+3.8 Hyperparameter Optimization
+Bayesian optimization via Optuna (TPE sampler, 50 trials per model) identifies optimal configurations:
+(18)
+using inner 3-fold CV to prevent information leakage between tuning and evaluation.
+3.9 Recommendation Algorithm
+Algorithm 1: SHAP-Based Personalized Recommendation
+Require: Student x, SHAP values φ, metadata M, top-K
+Ensure: Ranked recommendations R
+1: F_mod ← {j : j ∈ M.modifiable}
+2: for each  where 
+3:        // headroom
+4:        // feasibility score
+5: end for
+6: Sort by  descending; 
+7: if |R| < K then
+8:   Extend with contextual features F_ctx
+9: end if
+10: if |R| < K then
+11:   Report dominant immutable factors (diagnostic)
+12: end if
+13: return R with narrative text per recommendation
+
+Features are classified into three tiers: 16 modifiable (study hours, workshop participation, stress coping, etc.), 6 contextual (backlog status, peer group quality, internet access), and 19 immutable (gender, parental education, family income). This three-tier classification ensures that recommendations only suggest changes students can realistically make, while contextual features serve as fallback when primary modifiable factors are already at their optimal values. The composite score (line 4) uses a 0.3 floor to ensure high-impact features surface even with limited headroom, balancing theoretical impact with practical feasibility of change.
+4. Experimental Setup
+4.1 Dataset Description
+The dataset comprises 1,378 engineering students from five institutions across Maharashtra and Madhya Pradesh, India. The institutions include AISSMS College of Engineering Pune (primary site), Genba Sopanrao Moze College of Engineering, AISSMS Institute of Information Technology, Matoshree College of Engineering Nashik, and Lakshmi Narayan College of Technology Bhopal. Data was collected via validated Google Forms with psychometric scales verified by domain experts (Cronbach's α > 0.78). After preprocessing and feature engineering, 43 features span seven categories (Table 2).
+Table 2. Feature Categories and Counts
+Category
+Count
+Example Features
+Academic
+3
+10th%, 12th%, academic_index
+Demographic
+3
+gender, institute, residence
+Family/Socioeconomic
+9
+parental edu., income, guardian
+Behavioral
+10
+study hours, engagement_score
+Skills/Engagement
+8
+comm. skills, skills_index
+Wellbeing
+3
+health, stress, coping
+Choice Context
+4
+college/course choice reason
+Total
+43
+
+Table 3 shows the three prediction target distributions. All targets exhibit substantially better class balance than the commonly used placement prediction (7.1% positive, excluded from this study due to absence of predictive signal).
+
+Table 3. Prediction Target Distributions
+Objective
+Classes
+Distribution
+CGPA Category
+Low / Medium / High
+8.1% / 56.2% / 35.6%
+At-Risk
+At-risk / Not at-risk
+28.4% / 71.6%
+Career Ready
+Ready / Not ready
+37.9% / 62.1%
+4.2 Evaluation Protocol
+All models are evaluated via 5-fold Stratified K-Fold cross-validation (seed=42) with SMOTE applied within each training fold. The primary metric is F1-macro:
+(19)
+Secondary metrics include accuracy, balanced accuracy, F1-weighted, and AUC-ROC. All results are reported as mean ± standard deviation across 5 folds. F1-macro is chosen as the primary metric because it weights all classes equally, preventing models from achieving high scores by simply predicting the majority class while ignoring minority classes—a critical consideration given the CGPA Low class comprises only 8.1% of the dataset.
+5. Results and Discussion
+5.1 ML Baseline Performance
+Fig. 1 and Fig. 2 visualize the model comparison.
+
+Figure. 1 Model comparison for CGPA category prediction across all seven models.
+
+Figure. 2 Model comparison for at-risk student identification.
+Table 4 presents baseline results. XGBoost achieves the best performance across all three objectives, with particularly strong CGPA prediction (F1=0.805, AUC=0.952) and career readiness (F1=0.699).
+Table 4. Complete Model Performance (mean ± std, 5-fold CV). Best per objective in bold.
+Model
+Obj.
+Acc.
+F1-Mac.
+Bal.Acc.
+AUC
+LR
+CGPA
+.674±.037
+.643±.038
+.720±.049
+.855±.021
+RF
+CGPA
+.730±.022
+.601±.024
+.582±.021
+.852±.016
+SVM
+CGPA
+.549±.032
+.480±.035
+.518±.053
+.695±.047
+XGB
+CGPA
+.866±.010
+.805±.017
+.782±.022
+.952±.013
+TabNet
+CGPA
+.690±.084
+.645±.110
+.699±.100
+.845±.082
+FT-T
+CGPA
+.592±.021
+.427±.041
+.434±.032
+.687±.025
+SAINT
+CGPA
+.608±.039
+.460±.079
+.462±.065
+.718±.047
+LR
+Risk
+.736±.030
+.702±.034
+.726±.037
+.810±.034
+RF
+Risk
+.762±.040
+.699±.052
+.695±.051
+.812±.046
+SVM
+Risk
+.664±.033
+.623±.031
+.641±.030
+.684±.037
+XGB
+Risk
+.816±.026
+.767±.040
+.760±.040
+.852±.030
+TabNet
+Risk
+.650±.030
+.626±.031
+.669±.045
+.735±.058
+FT-T
+Risk
+.722±.033
+.584±.060
+.589±.049
+.703±.057
+SAINT
+Risk
+.731±.015
+.565±.041
+.573±.030
+.701±.035
+LR
+Career
+.663±.039
+.655±.039
+.653±.039
+.732±.032
+RF
+Career
+.701±.029
+.673±.029
+.667±.030
+.769±.025
+SVM
+Career
+.655±.017
+.645±.017
+.645±.017
+.722±.020
+XGB
+Career
+.722±.021
+.699±.024
+.695±.024
+.788±.019
+TabNet
+Career
+.546±.063
+.543±.056
+.540±.058
+.599±.065
+FT-T
+Career
+.619±.052
+.423±.052
+.508±.012
+.582±.051
+SAINT
+Career
+.613±.044
+.472±.044
+.518±.014
+.584±.048
+
+5.2 ML vs. DL Analysis
+Fig. 3 shows the cross-validation distribution. Three key findings emerge:
+XGBoost dominates: XGBoost outperforms all models on every objective, confirming that gradient boosting is optimal for small tabular educational data. The performance gap is largest for CGPA (F1: 0.805 vs. 0.645 for TabNet, a 25% relative advantage).
+TabNet is the best DL model: TabNet achieves F1=0.543 for career readiness (vs. 0.699 for XGBoost) and reasonable CGPA performance (0.645), but with substantially higher variance (std=0.110 vs. 0.017 for XGBoost), indicating training instability.
+Transformer-based models struggle: FT-Transformer and SAINT significantly underperform on all objectives (F1=0.41–0.58), likely due to insufficient data for learning effective feature interactions through self-attention. This finding provides important empirical guidance: for educational datasets below 2,000 records, practitioners should invest in feature engineering and XGBoost tuning rather than complex DL architectures.
+
+Figure. 3 Cross-validation F1-Macro distribution. XGBoost shows both higher median and lower variance than all DL alternatives.
+
+Figure. 4 Career readiness prediction comparison across all models.
+
+
+5.3 Explainability Analysis
+Table 5. Top-5 Features by Mean |SHAP| Value
+Obj.
+Feature
+|SHAP|
+CGPA
+academic_index
+0.110
+CGPA
+tenth_percentage
+0.036
+CGPA
+gender
+0.027
+CGPA
+family_size
+0.020
+CGPA
+twelth_percentage
+0.017
+At-Risk
+academic_index
+0.126
+At-Risk
+tenth_percentage
+0.033
+At-Risk
+twelth_percentage
+0.030
+At-Risk
+gender
+0.023
+At-Risk
+stress_frequency
+0.015
+Career
+engagement_score
+0.161
+Career
+twelth_percentage
+0.064
+Career
+internship_payment
+0.034
+Career
+tenth_percentage
+0.022
+Career
+community_service
+0.022
+Table 5 presents the top-5 SHAP features per objective. Fig. 5–7 show the SHAP summary plots.
+Key findings: (1) The engineered academic_index is the strongest predictor for both CGPA category and at-risk identification (SHAP 0.110 and 0.126 respectively), substantially outperforming any individual raw feature. This validates domain-informed feature engineering. (2) For career readiness, the engineered engagement_score dominates (SHAP 0.161), confirming that holistic engagement in academic and professional activities is the primary driver of career preparedness. (3) Behavioral factors (stress frequency, workshop participation) emerge prominently for at-risk prediction, suggesting that intervention targeting these modifiable factors has the highest potential impact.
+TabNet's native attention masks corroborate SHAP rankings: academic_index receives the highest attention (4.19) for CGPA and at-risk, while engagement_score dominates for career readiness (3.38), providing cross-validation of explainability findings through two independent methods.
+
+Figure. 5 SHAP beeswarm plot for CGPA prediction. Red/blue indicates high/low feature values; positive SHAP pushes toward High CGPA.
+
+Figure. 6 SHAP summary for at-risk identification.
+
+Figure. 7 SHAP summary for career readiness.
+
+Figure. 8 Feature importance by category for CGPA prediction. Academic and behavioral categories dominate.
+
+Figure. 9 TabNet attention heatmap corroborating SHAP findings.
+5.4 Recommendation Case Studies
+Table 6 illustrates the recommendation engine output for an at-risk student.
+Table 6. Personalized Recommendations for At-Risk Student 
+#
+Factor
+Current
+Target
+SHAP
+1
+Workshop participation
+No
+Yes
++0.331
+2
+Peer group quality
+3/5
+4/5
++0.130
+3
+Socializing frequency
+1/5
+2/5
++0.077
+4
+Stress coping
+No
+Yes
++0.056
+5
+Teamwork skills
+3/5
+4/5
++0.050
+Workshop participation emerges as the highest-leverage intervention (SHAP +0.331), followed by peer group quality improvement (+0.130) and increased socialization (+0.077). These findings provide educators with a prioritized intervention strategy: engaging at-risk students in academic enrichment activities (workshops, seminars) has the strongest predicted impact on improving their academic trajectory.
+
+Figure. 10 Recommendation case study visualization across multiple students and objectives.
+
+Figure. 11 Confusion matrices for CGPA prediction. XGBoost shows strongest diagonal concentration.
+
+Figure. 12 Confusion matrices for at-risk identification.
+5.5 Discussion
+The results reveal several important insights for the EDM community:
+Feature engineering is more impactful than model complexity. The engineered academic_index and engagement_score consistently rank as top predictors across all objectives, outperforming any individual raw feature. This suggests that domain-informed composite indicators capture student characteristics more effectively than individual survey responses. For instance, academic_index (SHAP=0.126 for at-risk) is 3.800d7 more influential than the next raw feature (tenth_percentage, SHAP=0.033). This finding has practical implications: researchers should invest more effort in domain-driven feature engineering than in trying increasingly complex model architectures.
+Multi-objective framing enables holistic student support. By predicting academic performance, at-risk status, and career readiness simultaneously, the framework enables institutions to provide differentiated support: academic tutoring for CGPA-focused intervention, proactive counseling for at-risk students, and career development guidance for career readiness gaps. A student may perform adequately on CGPA (predicted Medium) yet be flagged as not career-ready due to missing internship experience—an insight invisible to single-objective systems.
+Gradient boosting remains optimal for small educational tabular data. Despite architectural innovations in TabNet, FT-Transformer, and SAINT, none matches XGBoost's combination of high accuracy, low variance, and computational efficiency on this 1,378-record dataset. The performance gap is substantial (F1: 0.805 vs. 0.645 for the best DL model on CGPA). This aligns with recent tabular-data findings by Goldblum et al. [20], who analyzed when neural networks outperform boosted trees. Practitioners working with typical institutional survey datasets (<5,000 records) should prioritize XGBoost with SHAP over DL architectures.
+Behavioral factors are key intervention targets for at-risk students. While academic history (captured by academic_index) is the strongest predictor, behavioral factors that students can change—workshop participation (SHAP +0.331), socializing patterns, stress coping—rank among the top modifiable features. This validates the recommendation engine's approach of targeting modifiable factors: the highest-impact intervention (workshop participation) has a SHAP impact 6.600d7 larger than the fifth-ranked factor (teamwork skills), enabling clear prioritization of institutional resources.
+Career readiness prediction confirms engagement as the primary driver. The F1 of 0.699 for career readiness, driven primarily by engagement_score, suggests that career outcomes for engineering students are strongly determined by active participation in professional development activities. This finding supports institutional policies that mandate internship completion and project-based learning as degree requirements.
+5.6 Threats to Validity
+Internal validity: The cross-sectional survey design captures associations but not causal relationships. SHAP attributions identify predictive factors, not interventions proven to improve outcomes. The recommendation that "workshop participation improves at-risk status" is a hypothesis generated by the model, not a validated causal claim. Longitudinal or experimental validation is needed to confirm intervention effectiveness.
+External validity: The dataset represents engineering students from five institutions in Maharashtra and Madhya Pradesh, India. Results may not generalize to other disciplines, countries, or educational systems. The demographic composition (58.4% male, predominantly 18–25 age group) reflects the engineering education context in India but limits generalizability to more diverse populations.
+Construct validity: Self-reported behavioral and psychosocial features (study hours, stress frequency, skill ratings) may be subject to social desirability bias. However, the validated survey instrument (Cronbach's 03b1 > 0.78) and anonymized collection process mitigate this concern. The career readiness definition (internship + projects completed) is a proxy measure; actual career success depends on additional factors not captured in the dataset.
+Statistical conclusion validity: All results are reported with standard deviation across 5-fold cross-validation, and class imbalance is explicitly handled via SMOTE and class-weighted loss. The sample size (N=1,378) provides sufficient statistical power for the observed effect sizes, though the minority class in CGPA (Low: 8.1%, n=112) has limited representation per fold.
+6. Conclusion
+This study presents an Explainable AI framework for multi-objective student performance prediction addressing three critical educational needs: academic performance assessment (XGBoost F1=0.805), at-risk student identification (F1=0.767), and career readiness evaluation (F1=0.699).
+The principal findings are: (1) domain-informed feature engineering produces composite indicators (academic_index, engagement_score) that outperform all individual raw features as predictors across all three objectives; (2) XGBoost with SHAP provides the optimal combination of prediction accuracy and interpretability for small educational tabular datasets, outperforming three DL architectures (TabNet, FT-Transformer, SAINT); (3) the SHAP-based recommendation engine successfully translates feature attributions into prioritized, personalized interventions targeting only modifiable student behaviors; and (4) behavioral factors, particularly workshop participation and peer engagement, emerge as the highest-leverage intervention targets for at-risk students.
+The framework's practical significance lies in its ability to simultaneously identify which students need help (at-risk identification), why they are struggling (SHAP explanations), and what specific actions can improve their outcomes (personalized recommendations)—providing a complete decision-support pipeline for academic advisors.
+Future work includes: (1) validation on multi-institutional datasets across different educational contexts and countries, (2) longitudinal studies to evaluate the real-world effectiveness of SHAP-based recommendations through controlled interventions, (3) integration of causal inference techniques (e.g., instrumental variables, propensity score matching) to establish directional intervention effects, (4) interactive dashboard development for real-time advisor use, and (5) extension to sequential prediction using temporal student data (semester-by-semester tracking).
+7. Data Availability
+The dataset and source code used for this research are available at https://github.com/shikhapachouly/student-recommondation. Access will be provided for legitimate research use upon request to the corresponding author.
+Conflicts of Interest
+The authors declare no conflict of interest.
+Author Contributions
+Shikha Pachouly: Conceptualization, Methodology, Software, Formal Analysis, Investigation, Data Curation, Writing – Original Draft, Visualization. D.S. Bormane: Supervision, Validation, Writing – Review & Editing.
+Acknowledgments
+The authors thank the participating institutions for providing the student survey data used in this study.
+References
+[1] A. Almalawi, B. Soh, A. Li, H. Samra, "Predictive Models for Educational Purposes: A Systematic Review", Big Data and Cognitive Computing, Vol. 8, No. 12, pp. 187, 2024. doi: 10.3390/bdcc8120187.
+[2] J. G. C. Kruger, A. d. S. Britto, J. P. Barddal, "An Explainable Machine Learning Approach for Student Dropout Prediction", Expert Systems with Applications, Vol. 233, pp. 120933, 2023. doi: 10.1016/j.eswa.2023.120933.
+[3] Z. Chen, G. Cen, Y. Wei, Z. Li, "Student Performance Prediction Approach Based on Educational Data Mining", IEEE Access, Vol. 11, pp. 131260--131272, 2023. doi: 10.1109/ACCESS.2023.3335985.
+[4] M. S. N. Al-Din, H. A. Al Abdulqader, "Students' Academic Performance Prediction Using Educational Data Mining and Machine Learning: A Systematic Review", International Journal of Research and Innovation in Social Science, Vol. 8, No. 8, pp. 1264--1291, 2024. doi: 10.47772/IJRISS.2024.808095.
+[5] V. Kumari, A. F. Meghji, R. Qadir, U. Gianchand, F. B. Shaikh, "Predicting Student Performance Using Educational Data Mining: A Review", KIET Journal of Computing and Information Sciences, Vol. 7, No. 1, 2024. doi: 10.51153/kjcis.v7i1.212.
+[6] Z. Alamgir, H. Akram, S. Karim, A. Wali, "Enhancing Student Performance Prediction via Educational Data Mining on Academic Data", Informatics in Education, Vol. 23, No. 1, pp. 1--18, 2023. doi: 10.15388/infedu.2024.04.
+[7] Y. Lou, K. F. Colvin, "Performance Prediction Using Educational Data Mining Techniques: A Comparative Study", Discover Education, Vol. 4, pp. 112, 2025. doi: 10.1007/s44217-025-00502-w.
+[8] M. M. Saeed, "Forecasting the Academic Performance by Leveraging Educational Data Mining", Intelligent Automation and Soft Computing, Vol. 39, No. 2, pp. 235--247, 2024. doi: 10.32604/iasc.2024.043020.
+[9] Tao-Hongli, "Educational Data Mining for Student Performance Prediction: Feature Selection and Model Evaluation", Journal of Electrical Systems, Vol. 20, No. 3s, pp. 412--423, 2024. doi: 10.52783/jes.3434.
+[10] S. Sarker, M. K. Paul, S. T. H. Thasin, M. A. M. Hasan, "Analyzing Students' Academic Performance Using Educational Data Mining", Computers and Education: Artificial Intelligence, Vol. 6, pp. 100263, 2024. doi: 10.1016/j.caeai.2024.100263.
+[11] A. Bettahi, F. Belouadha, H. Harroud, "A Modular and Explainable Machine Learning Pipeline for Student Dropout Prediction in Higher Education", Algorithms, Vol. 18, No. 10, pp. 662, 2025. doi: 10.3390/a18100662.
+[12] S. Yu, Y. Cai, B. Pan, M. Leung, "Semi-Supervised Feature Selection of Educational Data Mining for Student Performance Analysis", Electronics, Vol. 13, No. 3, pp. 659, 2024. doi: 10.3390/electronics13030659.
+[13] E. Kalita, A. M. Alfarwan, H. El Aouifi, A. Kukkar, S. Hussain, T. Ali, S. Gaftandzhieva, "Predicting Student Academic Performance Using Bi-LSTM: A Deep Learning Framework with SHAP-Based Interpretability and Statistical Validation", Frontiers in Education, Vol. 10, pp. 1581247, 2025. doi: 10.3389/feduc.2025.1581247.
+[14] R. Paul, S. Sarker, H. El Aouifi, S. Hussain, A. K. Baruah, S. Gaftandzhieva, "Analyzing Dropout of Students and an Explainable Prediction of Academic Performance Utilizing Artificial Intelligence Techniques", Frontiers in Education, Vol. 10, pp. 1698505, 2025. doi: 10.3389/feduc.2025.1698505.
+[15] Z. Liu, X. Zhou, Y. Liu, "Student Dropout Prediction Using Ensemble Learning with SHAP-Based Explainable AI Analysis", Journal of Social Systems and Policy Analysis, 2025. doi: 10.62762/JSSPA.2025.321501.
+[16] A. Abukader, A. Alzubi, O. R. Adegboye, "Intelligent System for Student Performance Prediction: An Educational Data Mining Approach Using Metaheuristic-Optimized LightGBM with SHAP-Based Learning Analytics", Applied Sciences, Vol. 15, No. 20, pp. 10875, 2025. doi: 10.3390/app152010875.
+[17] L. Cabral, R. Pinto, G. Goncalves, "AI-Powered Learning Analytics Dashboards: A Systematic Review of Applications, Techniques, and Research Gaps", Discover Education, Vol. 4, pp. 352, 2025. doi: 10.1007/s44217-025-00964-y.
+[18] K. Takami, B. Flanagan, Y. Dai, H. Ogata, "Personality-Based Tailored Explainable Recommendation for Trustworthy Smart Learning System in the Age of Artificial Intelligence", Smart Learning Environments, Vol. 10, pp. 65, 2023. doi: 10.1186/s40561-023-00282-6.
+[19] T. Lin, J. Yan, D. Jurgens, S. J. Tomkins, "Tab2Text: A Framework for Deep Learning with Tabular Data", In: Proc. of Findings of the Association for Computational Linguistics: EMNLP 2024, pp. 13430--13447, 2024. doi: 10.18653/v1/2024.findings-emnlp.756.
+[20] M. Goldblum, S. Khandagale, D. McElfresh, V. Prasad C, G. Ramakrishnan, J. Valverde, C. White, "When Do Neural Nets Outperform Boosted Trees on Tabular Data?", In: Proc. of Advances in Neural Information Processing Systems 36, 2023. doi: 10.52202/075280-3337.
+[21] N. Hollmann, S. Muller, L. Purucker, A. Krishnakumar, M. Korfer, S. B. Hoo, R. T. Schirrmeister, F. Hutter, "Accurate Predictions on Small Data with a Tabular Foundation Model", Nature, Vol. 637, pp. 319--326, 2025. doi: 10.1038/s41586-024-08328-6.
+[22] Y. Fan, P. Waldmann, "Tabular Deep Learning: A Comparative Study Applied to Multi-Task Genome-Wide Prediction", BMC Bioinformatics, Vol. 25, pp. 312, 2024. doi: 10.1186/s12859-024-05940-1.
+[23] X. Yi, J. Sun, X. Wu, "Novel Feature-Based Difficulty Prediction Method for Mathematics Items Using XGBoost-Based SHAP Model", Mathematics, Vol. 12, No. 10, pp. 1455, 2024. doi: 10.3390/math12101455.
+[24] S. W. Masood, M. Gogoi, S. A. Begum, "Optimised SMOTE-Based Imbalanced Learning for Student Dropout Prediction", Arabian Journal for Science and Engineering, 2025. doi: 10.1007/s13369-024-09287-w.
+[25] G. Nassreddine, L. Saleh, M. Al Majzoub, A. El Arid, "SHAP Explainability: An Ensemble Learning Approach for Student Performance Prediction", In: Proc. of 2025 IEEE International Conference on Industry 4.0, Artificial Intelligence, and Communications Technology, 2025. doi: 10.1109/IAICT65714.2025.11100707.

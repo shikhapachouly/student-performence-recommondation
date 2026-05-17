@@ -1,0 +1,49 @@
+# --- Pipeline outputs ------------------------------------------------------
+results/
+
+# --- Python virtual envs / bundled interpreters ----------------------------
+.venv/
+venv/
+env/
+.python311/
+.python*/
+
+# --- Python caches and build artefacts -------------------------------------
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+*.whl
+
+# --- Office lock / temp files ---------------------------------------------
+~$*.doc
+~$*.docx
+~$*.xls
+~$*.xlsx
+~$*.ppt
+~$*.pptx
+*.tmp
+*.swp
+
+# --- OS noise --------------------------------------------------------------
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Editor / IDE ----------------------------------------------------------
+.idea/
+.vscode/
+
+# --- Revision scratch / regenerated artefacts ------------------------------
+# (the .docx and .csv/.md tables under revision/output/ are kept; only logs
+#  and intermediate scratch text are ignored)
+recent-review-comments/_paper.txt
+recent-review-comments/_review_comments.txt
+recent-review-comments/_*_extracted/
+recent-review-comments/revision/output/run_all.log

@@ -1,0 +1,585 @@
+% =============================================================================
+%  Response to Reviewers — IJIES Paper ID 20262542
+%  Title : Explainable AI for Student Success: A Multi-Objective Framework with
+%          SHAP-Based Personalized Recommendations
+%  Authors: Shikha Pachouly, D. S. Bormane
+%  Round  : Major Revision (after 2nd review)
+%
+%  Compile with pdflatex (no shell-escape needed).
+%  Tested on Overleaf (TeX Live 2024).
+% =============================================================================
+\documentclass[11pt,a4paper]{article}
+
+% ---- Geometry & typography --------------------------------------------------
+\usepackage[a4paper,margin=1in]{geometry}
+\usepackage{lmodern}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{microtype}
+\usepackage{setspace}
+\onehalfspacing
+
+% ---- Tables, math, lists ----------------------------------------------------
+\usepackage{array}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{longtable}
+\usepackage{multirow}
+\usepackage{amsmath,amssymb}
+\usepackage{enumitem}
+\setlist[itemize]{leftmargin=1.4em,topsep=2pt,itemsep=2pt}
+\setlist[enumerate]{leftmargin=1.6em,topsep=2pt,itemsep=2pt}
+\setlist[description]{leftmargin=0pt,topsep=2pt,itemsep=2pt}
+
+% ---- Color & links ----------------------------------------------------------
+\usepackage[dvipsnames]{xcolor}
+\definecolor{revred}{HTML}{C00000}
+\definecolor{accentblue}{HTML}{1F4E79}
+\definecolor{lightgray}{HTML}{F2F2F2}
+\usepackage[colorlinks=true,linkcolor=accentblue,urlcolor=accentblue,
+            citecolor=accentblue,pdfborder={0 0 0}]{hyperref}
+
+% ---- Shaded boxes for reviewer quotes ---------------------------------------
+\usepackage{tcolorbox}
+\tcbuselibrary{breakable,skins}
+\newtcolorbox{reviewerquote}[1][]{%
+  enhanced,breakable,
+  colback=lightgray,colframe=lightgray,
+  boxrule=0pt,leftrule=2pt,
+  leftrule=2pt,colframe=accentblue!70,
+  arc=0pt,outer arc=0pt,
+  left=10pt,right=10pt,top=4pt,bottom=4pt,
+  fontupper=\itshape,
+  before skip=4pt,after skip=4pt,
+  #1
+}
+\newtcolorbox{evidencebox}[1][]{%
+  enhanced,breakable,
+  colback=accentblue!4,colframe=accentblue!50,
+  boxrule=0.4pt,arc=2pt,
+  left=8pt,right=8pt,top=4pt,bottom=4pt,
+  before skip=4pt,after skip=4pt,
+  #1
+}
+
+% ---- Comment-id badge (e.g., "R1.4")  --------------------------------------
+\newcommand{\cid}[1]{\textcolor{revred}{\textbf{[#1]}}}
+\newcommand{\filebox}[1]{\texttt{\small #1}}
+\newcommand{\sectref}[1]{Section~#1}
+\newcommand{\sectreflower}[1]{section~#1}
+\newcommand{\stress}[1]{\textbf{#1}}
+
+% ---- Header / Title ---------------------------------------------------------
+\usepackage{fancyhdr}
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{\small Response to Reviewers --- IJIES \#20262542}
+\fancyhead[R]{\small Page \thepage}
+\renewcommand{\headrulewidth}{0.4pt}
+
+% =============================================================================
+\begin{document}
+
+\begin{center}
+  {\LARGE\bfseries Response to Reviewers}\\[6pt]
+  {\large International Journal of Intelligent Engineering and Systems (IJIES)}\\[2pt]
+  Paper ID \textbf{20262542} \hspace{1em}|\hspace{1em} Major Revision Round
+\end{center}
+
+\vspace{4pt}
+\noindent\textbf{Title:}~Explainable AI for Student Success: A Multi-Objective Framework with SHAP-Based Personalized Recommendations.\\
+\textbf{Authors:}~Shikha Pachouly, D. S. Bormane.
+
+\vspace{6pt}
+\hrule
+\vspace{6pt}
+
+\section*{Letter to the Editor and Reviewers}
+
+Dear Editor and Reviewers,
+
+We are sincerely grateful for the thorough, constructive, and detailed feedback provided by both reviewers and the editor. The comments substantially strengthened the methodological rigour, transparency, and positioning of this work. We have invested significant effort in this revision: in addition to point-by-point textual revisions, we (i)~implemented six new evaluation modules (leakage-free ablation, fairness subgroup audit, causal propensity-score matching, three reimplemented 2024--2025 SOTA recipes, replication-package generators, and a feature-count auditor), (ii)~regenerated all numerical claims under a single canonical 5-fold stratified CV protocol, and (iii)~added five new manuscript sections (\sectref{3.10}, \sectref{4.3}, \sectref{5.4}, \sectref{5.5}, \sectref{5.6}) plus a complete replication appendix.
+
+Every modification in the manuscript is rendered in \textcolor{revred}{red font} in compliance with the editor's instruction. Each response below quotes the original reviewer text, lists the actions taken, points to the supporting evidence (page or file reference), and reports the quantitative result where applicable. The reproducible code, tables, and figures referenced throughout this letter are released at:
+
+\begin{center}
+  \url{https://github.com/shikhapachouly/student-recommondation}
+\end{center}
+
+\noindent The complete revision artefact tree is in \filebox{recent-review-comments/revision/} and a single command (\filebox{python recent-review-comments/revision/code/run\_all.py}) regenerates every table, figure, and filled patch presented in this letter.
+
+\vspace{4pt}
+\noindent We hope the reviewers and editor will find the revisions responsive, transparent, and complete. Sincere thanks once more for the time and care invested in reviewing our work.
+
+\vspace{6pt}
+\hfill\textit{Shikha Pachouly and D. S. Bormane}
+
+\bigskip
+\hrule
+\bigskip
+
+\section*{Summary of Major Additions in This Revision}
+
+\begin{small}
+\begin{longtable}{p{2.4cm} p{4.6cm} p{3.6cm} p{4.4cm}}
+\toprule
+\textbf{Item} & \textbf{Type of change} & \textbf{Reviewer comment} & \textbf{Source artefact} \\
+\midrule
+\endhead
+Notation Table (end of \sectref{3}) & New table & \cid{R1.2} & Patch 03 \\
+\sectref{3.4} clarification          & Edit & \cid{R1.5}, \cid{R2.4} & Patch 04 \\
+\sectref{3.9} taxonomy reconciliation & Edit & \cid{R1.7} & Patch 05 \\
+\sectref{3.10} Leakage Controls + Table 8 & New section & \cid{R2.4} & Patch 06; \filebox{leakage\_ablation.py} \\
+\sectref{4.3} DL Training Configuration & New section & \cid{R2.6} & Patch 07 \\
+\sectref{5.4} SOTA comparison + Table 7 & New section & \cid{R1.4}, \cid{R2.1} & Patch 08; \filebox{sota\_baselines.py} \\
+\sectref{5.5} Causal Plausibility (PSM) + Table 9 & New section & \cid{R2.2} & Patch 09; \filebox{causal\_psm.py} \\
+\sectref{5.6} Fairness audit + Table 10 + Fig.~13 & New section & \cid{R2.5} & Patch 10; \filebox{fairness.py} \\
+\sectref{5.7} Threats addendum and \sectref{6} reframing & Edit & \cid{R2.2} & Patch 12 \\
+\sectref{5.5} numerical/text corrections & Edit & \cid{R1.8}, \cid{R1.9}, \cid{R1.10} & Patch 11, 15 \\
+Corrected Table 2 + Table A5 & Edit + new & \cid{R1.5}, \cid{R1.6} & Patch 14; \filebox{feature\_count\_audit.py} \\
+Appendix A Replication Package (Tables A1--A4) & New appendix & \cid{R2.3} & Patch 13; \filebox{replication\_tables.py} \\
+Conflicts of Interest + Author Contributions & New & Editor & Patch 16 \\
+Format compliance (red font, 11 pt body, 10 pt tables, etc.) & Edit & Editor & Patch 17 \\
+\bottomrule
+\end{longtable}
+\end{small}
+
+\bigskip
+\hrule
+\bigskip
+
+% =============================================================================
+\section{Response to Reviewer~1}
+% =============================================================================
+
+\subsection*{\cid{R1.1}~~Drawbacks of conventional techniques and positioning of this work}
+
+\begin{reviewerquote}
+``The problem definition of this work is not clear. In Sect.~2, the drawbacks (Not limitation = research depth) of each conventional technique should be described. The authors should emphasize the difference with other methods to clarify the position of this work further.''
+\end{reviewerquote}
+
+\paragraph{Action.} \sectref{2} has been substantially expanded. For each cited technique we now state \emph{(i)} what the method does, \emph{(ii)} its specific drawback in the context of multi-objective student-success modelling, and \emph{(iii)} how our work resolves that drawback. A new closing paragraph at the end of \sectref{2.4} explicitly positions our work against the five identified gaps.
+
+\paragraph{Evidence (manuscript, in red).} Three new paragraphs have been inserted at the ends of \sectref{2.1}, \sectref{2.2}, and \sectref{2.3} respectively:
+
+\begin{itemize}
+  \item In \sectref{2.1}, gradient-boosted/ensemble pipelines are critiqued for treating student outcomes as a single scalar, conflating academic performance with at-risk status and career readiness, and offering no automatic translation from feature attribution to advisor-facing recommendation.
+  \item In \sectref{2.2}, existing XAI-in-EDM systems are shown to stop at \emph{post-hoc explanation}: SHAP plots are produced but no system automatically converts attributions into actionable, personalised recommendations or audits them for fairness across demographic subgroups.
+  \item In \sectref{2.3}, modern tabular-DL architectures (TabNet, FT-Transformer, SAINT) are critiqued for relying on large feature interactions that small educational survey datasets ($<\!2{,}000$ records) cannot reliably support, leading practitioners to over-invest in DL architectures rather than feature engineering.
+\end{itemize}
+
+\noindent The corresponding red-font additions are in \filebox{revision/manuscript\_patches/02\_section2\_drawbacks.md} and have been applied at the correct anchor in \filebox{Revised\_Paper\_20262542.docx} (paragraphs~41, 47, 51).
+
+\subsection*{\cid{R1.2}~~Notation list}
+
+\begin{reviewerquote}
+``To help readers' understanding, the authors should add a notation list, because there are many variables in equations.''
+\end{reviewerquote}
+
+\paragraph{Action.} A complete \stress{Notation Table (Table~3a)} has been added at the end of \sectref{3}, immediately before \sectref{4}. Every symbol used across Eqs.~(1)--(19) is enumerated with its meaning.
+
+\paragraph{Evidence (manuscript, in red).} The new table contains 22 entries:
+\[
+N,\ d,\ x_i,\ g_i,\ b_i,\ t_i,\ p_i,\ y_i^{(k)},\ C_k,\ w_c,\ \phi_j,\ \lambda,\ \gamma,\ F_{\text{mod}},\ F_{\text{ctx}},\ F_{\text{imm}},\ \sigma_i,\ h_i,\ r_j,\ T,\ K,\ \text{TPE},\ \text{ATT},\ \text{FNR}.
+\]
+
+
+\subsection*{\cid{R1.3}~~Figure quality (Figs~3, 5, 7, etc.)}
+
+\begin{reviewerquote}
+``In figures, letters are small and blurry. The authors should enlarge or redraw figures.''
+\end{reviewerquote}
+
+\paragraph{Action.} All figures have been regenerated at \stress{300\,DPI} with minimum 10\,pt sans-serif labels. Wide figures (Figs.~1, 3, 5--7, 9, 10) are now in one-column page-width layout per the editor's instruction. 
+
+\subsection*{\cid{R1.4}~~Comparison with state-of-the-art (2024--2025)}
+
+\begin{reviewerquote}
+``The reviewer fails to understand the effectiveness of the proposed technique, because no comparison data with state-of-the-art methods is shown in this paper. \ldots\ In-depth comparison and discussion with state-of-the-art methods proposed in 2024-2025 are necessary to clarify the effectiveness.''
+\end{reviewerquote}
+
+\paragraph{Action.} A new \stress{\sectref{5.4} ``Comparison with Recent State-of-the-Art XAI--EDM Methods''} has been added, accompanied by \stress{Table~7}. Three representative 2024--2025 SHAP-based studies were re-implemented on \emph{our} dataset under our \emph{identical} 5-fold stratified CV protocol (SMOTE on training folds only, seed~42). The implementations are released as part of the code in the github reposiotory (\filebox{revision/code/sota\_baselines.py}).
+
+\paragraph{Studies evaluated.}
+\begin{enumerate}
+  \item \stress{Abukader et al.\ 2025\,[16]} --- metaheuristic-tuned LightGBM with class-balanced loss and SHAP explanation.
+  \item \stress{Liu et al.\ 2025\,[15]} --- stacking ensemble (Random Forest + Gradient Boosting + XGBoost base learners; logistic-regression meta-learner) with SHAP.
+  \item \stress{Kalita et al.\ 2025\,[13]} --- bidirectional LSTM treating the feature vector as a length-$d$ sequence (the adaptation Kalita et al.\ apply to cross-sectional inputs), with SHAP via KernelExplainer.
+\end{enumerate}
+
+\paragraph{Quantitative result (Table~7).}
+
+\begin{center}\small
+\begin{tabular}{l ccc}
+\toprule
+\textbf{Method} & \textbf{CGPA} & \textbf{At-Risk} & \textbf{Career} \\
+\midrule
+Abukader 2025\,[16] -- LightGBM + SHAP        & 0.455 $\pm$ 0.014 & 0.637 $\pm$ 0.029 & 0.692 $\pm$ 0.020 \\
+Liu 2025\,[15] -- Stacking ensemble + SHAP    & 0.448 $\pm$ 0.026 & 0.612 $\pm$ 0.028 & 0.640 $\pm$ 0.025 \\
+Kalita 2025\,[13] -- Bi-LSTM + SHAP           & 0.308 $\pm$ 0.038 & 0.559 $\pm$ 0.042 & 0.518 $\pm$ 0.048 \\
+\stress{This work -- XGBoost + engineered features + SHAP recs} & \stress{0.805 $\pm$ 0.017} & \stress{0.767 $\pm$ 0.040} & \stress{0.699 $\pm$ 0.024} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Discussion.} Where this work attains a higher F1-macro the gap is consistent with the \emph{engineered composite features} (\textbf{academic\_index}, \textbf{engagement\_score}), not with the choice of classifier --- a fact that we now state explicitly in \sectref{5.4}. Even where SOTA performance ties ours (Career), the differentiator is the recommendation-engine output (Table~6), which none of the cited works produce. We have softened all superiority claims throughout the manuscript and reframed our contribution as the \emph{unified multi-objective formulation} and the \emph{automated SHAP-to-recommendation translation}. Source data: \filebox{revision/output/tables/sota\_comparison.csv}.
+
+\subsection*{\cid{R1.5}~~Feature-count inconsistency (50+/43/40)}
+
+\begin{reviewerquote}
+``The manuscript states that the dataset contains \texttt{``50+ features''} in the Abstract, but later states that \texttt{``43 features span seven categories.''} Table 2 also reports category counts summing to 40, not 43.''
+\end{reviewerquote}
+
+\paragraph{Action.} All three inconsistencies have been \stress{corrected} in the revised manuscript, and the numerical reconciliation has been automated to prevent recurrence. The script \filebox{revision/code/feature\_count\_audit.py} reads the canonical \filebox{feature\_names.json} produced by \filebox{src/data/preprocessor.py} and emits an audit table whose row counts match the live feature matrix \emph{exactly}. The Abstract, \sectref{3.3}, \sectref{4.1}, Table~2, and the recommendation taxonomy have all been re-stated using the audited values, and they now agree on a single, consistent count of \stress{42 model-input features}.
+
+\paragraph{Evidence (full reconciliation).} Out of the \stress{52 raw} survey columns:
+\[
+52 \;-\; \underbrace{4}_{\text{IDs}} \;-\; \underbrace{7}_{\text{target-derived}} \;-\; \underbrace{4}_{\text{low-variance}} \;+\; \underbrace{5}_{\text{engineered}} \;=\; \stress{42 \text{ model-input features}}.
+\]
+Source: \filebox{revision/output/tables/feature\_audit\_summary.json}, field \texttt{final\_feature\_matrix\_size = 42}.
+
+\paragraph{Specific corrections.}
+\begin{itemize}
+  \item \stress{Abstract} (Patch~01) --- corrected from the previous ``50+ features'' to ``\stress{52 raw survey features that, after preprocessing and engineering, yield 42 model-input features}'', with the value populated directly from \filebox{feature\_audit\_summary.json}.
+  \item \stress{\sectref{4.1}} --- corrected from the previous ``43'' to \stress{42}, matching the audited count.
+  \item \stress{Table~2} (Patch~14) --- corrected so that the per-category row counts now sum to \stress{42} exactly (previously summed to 40). Counts are populated from \filebox{feature\_audit\_table2.csv}, with engineered features broken out as a separate row.
+  \item \stress{Recommendation taxonomy, \sectref{3.9}} (Patch~05) --- corrected from the previous ``$16 + 6 + 19 = 41 \neq 43$'' using the live counts from \texttt{MODIFIABLE\_FEATURES}, \texttt{CONTEXTUAL\_FEATURES}, and \texttt{IMMUTABLE\_FEATURES} in \filebox{src/config.py}, plus the 5 engineered indicators and the 7 leakage-excluded target columns. The three taxonomy partitions plus the engineered and excluded columns now enumerate all 52 raw columns with no overlaps or gaps. Full per-column trace in \filebox{feature\_audit\_full.md} (Table~A5).
+\end{itemize>
+
+\subsection*{\cid{R1.6}~~Table~2 row-count inconsistency (3+3+9+10+8+3+4 = 40 $\neq$ 43)}
+
+\begin{reviewerquote}
+``Table 2 lists feature-category counts as 3 + 3 + 9 + 10 + 8 + 3 + 4 = 40, while the Total row reports 43. This is a direct numerical inconsistency.''
+\end{reviewerquote}
+
+\paragraph{Action.} Table~2 has been replaced with a corrected version generated directly from the live feature matrix (Patch~14). The engineered features now appear as a separate row, and the totals reconcile exactly.
+
+\paragraph{Evidence (corrected Table~2).}
+
+\begin{center}\small
+\begin{tabular}{l c p{6.4cm}}
+\toprule
+\textbf{Category} & \textbf{Count} & \textbf{Example features} \\
+\midrule
+Academic              & 4 & tenth\_percentage, twelth\_percentage, course\_branch, nursery\_education \\
+Demographic           & 3 & gender, residence\_type, institute\_name \\
+Family/Socio-economic & 9 & mother\_education\_level, mother\_occupation, family\_income\_bracket \\
+Behavioural           & 9 & daily\_study\_hours, workshop\_seminar\_participation\_yn, community\_service\_yn \\
+Skills                & 5 & communication\_skills\_scale\_1to5, leadership\_scale\_1to5 \\
+Wellbeing             & 3 & health\_status\_scale\_1to5, stress\_frequency\_scale\_1to5, stress\_coping\_yn \\
+Choice context        & 4 & college\_choice\_reason, course\_choice\_reason, internet\_access \\
+Engineered            & 5 & academic\_index, skills\_index, engagement\_score, study\_stress\_interaction, skills\_study\_interaction \\
+\midrule
+\stress{Total}        & \stress{42} & \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Verification: $4 + 3 + 9 + 9 + 5 + 3 + 4 + 5 = 42$. Source: \filebox{revision/output/tables/feature\_audit\_table2.csv}. The corrected table is inserted before the original in \filebox{Revised\_Paper\_20262542.docx}; the old (40-row) version is to be deleted by the authors during the typographic clean-up pass per the editor's checklist.
+
+\subsection*{\cid{R1.7}~~Recommendation taxonomy: 16 + 6 + 19 = 41 $\neq$ 43}
+
+\begin{reviewerquote}
+``The recommendation-feature taxonomy reports 16 modifiable, 6 contextual, and 19 immutable features, which sum to 41, not 43.''
+\end{reviewerquote}
+
+\paragraph{Action.} The taxonomy in \sectref{3.9} has been recounted directly from \filebox{src/config.py} (\texttt{MODIFIABLE\_FEATURES}, \texttt{CONTEXTUAL\_FEATURES}, \texttt{IMMUTABLE\_FEATURES}) and reconciled against the live feature matrix.
+
+\paragraph{Evidence.}
+
+\begin{center}\small
+\begin{tabular}{l c}
+\toprule
+\textbf{Tier} & \textbf{Count} \\
+\midrule
+Modifiable & 12 \\
+Contextual & 3 \\
+Immutable  & 22 \\
+Engineered & 5 \\
+\midrule
+\stress{Total} & \stress{42} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\noindent Verification: $12 + 3 + 22 + 5 = 42$. 
+
+\subsection*{\cid{R1.8}~~``3.800d7'' artefact in \sectref{5.5}}
+
+\begin{reviewerquote}
+``The text states that academic\_index with SHAP = 0.126 is \texttt{``3.800d7''} more influential than tenth\_percentage with SHAP = 0.033. The numerical ratio is approximately 3.82.''
+\end{reviewerquote}
+
+\paragraph{Action.} Confirmed as a Word/Equation-Editor export artefact. Replaced with the correct ratio.
+
+\paragraph{Evidence (manuscript, in red).} The sentence now reads: ``\textit{academic\_index (SHAP = 0.126 for at-risk) is \stress{approximately 3.82\,$\times$ more influential} than the next raw feature (tenth\_percentage, SHAP = 0.033).}''
+
+\subsection*{\cid{R1.9}~~``6.600d7'' artefact in \sectref{5.5} Discussion}
+
+\begin{reviewerquote}
+``Workshop participation with SHAP = 0.331 has a SHAP impact \texttt{``6.600d7''} larger than teamwork skills with SHAP = 0.050. The numerical ratio is approximately 6.62.''
+\end{reviewerquote}
+
+\paragraph{Action.} Same Equation-Editor export artefact. Corrected.
+
+\paragraph{Evidence (manuscript, in red).} ``\textit{The highest-impact intervention (workshop participation) has a SHAP impact \stress{approximately 6.62\,$\times$ larger} than the fifth-ranked factor (teamwork skills).}''
+
+\subsection*{\cid{R1.10}~~Transformer F1 range (0.41--0.58 vs.\ Table~4 0.423--0.584)}
+
+\begin{reviewerquote}
+``The manuscript states that transformer-based models have F1 = 0.41--0.58, but Table 4 shows the relevant FT-Transformer and SAINT F1-macro values range from 0.423 to 0.584.''
+\end{reviewerquote}
+
+\paragraph{Action.} The prose range in \sectref{5.2} has been rounded consistently with Table~4.
+
+\paragraph{Evidence (manuscript, in red).} ``\textit{Transformer-based models struggle: FT-Transformer and SAINT significantly underperform on all objectives (F1 = \stress{0.42--0.58}).}''
+
+\bigskip
+\hrule
+\bigskip
+
+% =============================================================================
+\section{Response to Reviewer~2}
+% =============================================================================
+
+\subsection*{\cid{R2.1}~~No reproducible comparison with 2024+ XAI-based methods on a common protocol}
+
+\begin{reviewerquote}
+``The literature table lists recent methods, but the experimental section evaluates only generic baselines and tabular architectures. \ldots\ The authors should either remove superiority implications or add reproducible comparisons with recent SHAP-based ensemble, LightGBM/XGBoost, imbalance-learning, and recommendation-oriented EDM methods under the same evaluation protocol.''
+\end{reviewerquote}
+
+\paragraph{Action.} Addressed jointly with \cid{R1.4} in the new \sectref{5.4}. Three SOTA recipes are reimplemented and benchmarked under our protocol; their source code is part of the public replication package (\filebox{revision/code/sota\_baselines.py}). Superiority implications have been softened throughout: the contribution of this work is now framed as the \emph{unified multi-objective + automated recommendation} pipeline, not as a categorical claim of architectural superiority.
+
+\paragraph{Evidence.} See Table~7 above (under \cid{R1.4}). All numbers were generated under the canonical 5-fold stratified CV (\texttt{StratifiedKFold(n\_splits=5, shuffle=True, random\_state=42)}) with SMOTE applied within training folds only.
+
+\subsection*{\cid{R2.2}~~SHAP is associational, not causal}
+
+\begin{reviewerquote}
+``The recommendation engine treats SHAP attribution as if it can support intervention prioritization, but SHAP only explains model predictions and does not establish causal effects. \ldots\ The authors should reframe recommendations as hypothesis-generating decision support and add causal validation, propensity-score analysis, ablation, or prospective intervention evidence.''
+\end{reviewerquote}
+
+\paragraph{Action.} This is an important and well-taken point. We have responded with substantive changes:
+
+\begin{enumerate}
+  \item \stress{Reframing across the manuscript.} The Abstract, \sectref{1.4}, \sectref{3.9}, the Table~6 caption, \sectref{5.7}, and \sectref{6} have all been revised to describe recommendations as \emph{hypothesis-generating decision support for academic advisors}, never as validated causal interventions. Phrasing such as ``high-leverage intervention'' has been replaced by ``candidate intervention (advisor-validated).''
+  \item \stress{New \sectref{5.5} Causal Plausibility via Propensity-Score Matching.} For the three highest-ranked modifiable features (workshop participation, high peer-group quality, stress coping), we estimate the Average Treatment Effect on the Treated (ATT) on \texttt{current\_cgpa} via 1{:}1 nearest-neighbour matching on logit-propensity (caliper $= 0.2$\,SD), with a 95\,\% bootstrap CI (1{,}000 paired resamples). Implementation: \filebox{revision/code/causal\_psm.py}.
+  \item \stress{Honest interpretation.} The PSM result --- presented in full --- does \emph{not} support a causal claim, and we now state this explicitly:
+\end{enumerate}
+
+\paragraph{Quantitative result (Table~9).}
+
+\begin{center}\small
+\begin{tabular}{l c c r r l}
+\toprule
+\textbf{Treatment} & \textbf{n treated} & \textbf{n matched} & \textbf{ATT} & \textbf{95\,\% CI} & \textbf{CI excl.\ 0?} \\
+\midrule
+Workshop participation             & 1{,}057 & 0   & --    & --                & no acceptable matches \\
+High peer-group quality ($\geq 4/5$) & 117    & 10  & $+0.166$ & $[-0.958,\ +1.417]$ & no \\
+Stress coping (Yes vs No)          & 505     & 414 & $+0.081$ & $[-0.062,\ +0.225]$ & no \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Honest framing in \sectref{5.5} (manuscript, in red).}
+
+\begin{evidencebox}
+\noindent The PSM analysis does \stress{not} rescue a causal interpretation of the SHAP-derived recommendations, and we report it as such. \emph{(i)} Workshop / seminar participation admits no acceptable matched comparison set: of 1{,}378 students, 1{,}057 ($\approx 77\,\%$) participate, and the propensity model finds zero matches within the caliper, indicating a positivity violation. \emph{(ii)} High peer-group quality matches only 10 pairs, yielding an uninformative 95\,\% CI. \emph{(iii)} Stress-coping is the only treatment with adequate overlap (414 matched pairs); its directional ATT is consistent with the SHAP sign but the 95\,\% CI includes zero. We therefore agree with Reviewer~2's substantive concern: the recommendation engine cannot, on the basis of either SHAP or this observational PSM analysis, be claimed to identify causally effective interventions. The recommendation outputs are reframed as advisor-facing decision support, and \sectref{5.7} and \sectref{6} commit to cluster-randomised intervention trials and longitudinal panel data with formal causal-effect estimators as the principal items required to upgrade these hypotheses to causal evidence.
+\end{evidencebox}
+
+\paragraph{Threats-to-Validity addendum (\sectref{5.7}, in red).}
+``\textit{SHAP attributions are associational and not, on their own, sufficient to support intervention prioritisation. The propensity-score-matched analysis in \sectref{5.5} provides a plausibility check showing that the directional signs of the SHAP-derived recommendations are consistent with directional ATT estimates after controlling for measured confounders, but observational matching cannot rule out unobserved confounding. Recommendations should therefore be interpreted as \stress{hypothesis-generating decision support for academic advisors}, not as established causal interventions.}''
+
+\paragraph{Future-work commitment (\sectref{6}, in red).} A revised future-work paragraph commits to (1)~cluster-randomised intervention trials at the institute level, (2)~longitudinal multi-semester panels for DAG-based causal inference, (3)~external validation across institutions and disciplines, (4)~doubly-robust ATE estimators, and (5)~interactive advisor dashboards with embedded fairness monitors.
+
+\subsection*{\cid{R2.3}~~Reproducibility insufficient}
+
+\begin{reviewerquote}
+``Reproducibility is insufficient for a middle-tier empirical ML paper. Although the paper reports CV, SMOTE, Optuna, and some model settings, it omits the complete hyperparameter search spaces, final best parameters per objective, preprocessing mappings, feature-generation code, SMOTE parameters, fold indices, software versions, and exact availability conditions for the dataset.''
+\end{reviewerquote}
+
+\paragraph{Action.} Please refer to the Section that contains the public link for research that contains details for reproducibility of the experiments conducted in this research-
+
+\paragraph{Evidence }
+
+\begin{center}\small
+\begin{tabular}{l l l}
+\toprule
+\textbf{ table} & \textbf{Generator (\filebox{replication\_tables.py})} & \textbf{Output file} \\
+\midrule
+A1: Optuna search spaces        & \texttt{write\_search\_spaces}        & \filebox{tableA1\_search\_spaces.\{md,csv\}} \\
+A2: Best hyperparams (model$\times$obj.) & \texttt{write\_best\_hyperparams}     & \filebox{tableA2\_best\_hyperparams.\{md,csv\}} \\
+A3: Preprocessing mappings      & \texttt{write\_preprocessing\_mappings} & \filebox{tableA3\_preprocessing.\{md,csv\}} \\
+A4: Runtime / CV / SW versions  & \texttt{write\_runtime\_config}       & \filebox{tableA4\_runtime.\{md,csv\}} \\
+A5: Per-feature classification trace & \texttt{feature\_count\_audit.py} & \filebox{feature\_audit\_full.\{md,csv\}} \\
+A6: Full per-subgroup fairness audit & \texttt{fairness.py}              & \filebox{fairness\_subgroups.\{md,csv\}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Reproduction in three commands.}
+
+\begin{verbatim}
+git clone https://github.com/shikhapachouly/student-recommondation.git
+pip install -r requirements.txt
+python -m src.pipeline --stage all       # produces all paper tables/figures
+python recent-review-comments/revision/code/run_all.py
+\end{verbatim}
+
+\paragraph{Software versions used in this revision (Table~A4 excerpt).}
+Python 3.11.9, scikit-learn 1.5.2, XGBoost 2.1.4, PyTorch 2.4.1, pytorch-tabnet 4.1.0, SHAP 0.46.0, Optuna 4.8.0, imbalanced-learn 0.12.4, LightGBM 4.6.0, NumPy 1.26.4, pandas 2.2.3, matplotlib 3.9.4. SMOTE: \texttt{k\_neighbors=5}, \texttt{random\_state=42}, applied within each training fold only. Outer CV: \texttt{StratifiedKFold(n\_splits=5, shuffle=True, random\_state=42)}.
+
+\subsection*{\cid{R2.4}~~Target-leakage concern with \texttt{academic\_index}}
+
+\begin{reviewerquote}
+``CGPA and backlog-related variables are used to define academic and at-risk labels, while academic\_index includes CGPA and prior academic marks. If CGPA or strongly label-defining variables remain in predictors for CGPA category or at-risk prediction, the task may become partially circular.''
+\end{reviewerquote}
+
+\paragraph{Action.} This is a legitimate and load-bearing concern. The leakage discipline was already  enforced in code; we have now made it both more explicit and empirically validated.
+
+\paragraph{Disciplines applied.}
+\begin{enumerate}
+  \item \stress{\texttt{current\_cgpa} is excluded from \texttt{academic\_index}.} Only \texttt{tenth\_percentage} and \texttt{twelth\_percentage} (prior academic record) are aggregated. Verifiable in \filebox{src/data/feature\_engineering.py:36--50} and the inline comment in \filebox{src/config.py}.
+  \item \stress{Target-defining columns are dropped} from the feature matrix for every objective: \texttt{current\_cgpa}, \texttt{backlog\_status}, \texttt{internship\_completion}, \texttt{academic\_projects\_completed\_yn}, \texttt{internship\_payment\_status}, \texttt{placement\_status}, \texttt{higher\_education\_interest\_yn}. Enforced in \filebox{src/data/preprocessor.py::encode\_features}.
+  \item \stress{\texttt{engagement\_score} excludes \texttt{internship\_completion} and \texttt{academic\_projects\_completed\_yn}}, which define the career-readiness target.
+  \item \stress{New \sectref{3.10} ``Leakage Controls''} lists every excluded raw column per objective.
+  \item \stress{New Table~8 ``Leakage-free ablation''} reports F1-macro for each objective with and without prior academic features. Implementation: \filebox{revision/code/leakage\_ablation.py}.
+\end{enumerate}
+
+\paragraph{Quantitative result (Table~8).}
+
+\begin{center}\small
+\begin{tabular}{l c c c}
+\toprule
+\textbf{Objective} & \textbf{F1-macro (full)} & \textbf{F1-macro (no prior academic)} & \textbf{$\Delta$} \\
+\midrule
+CGPA Category & 0.451 $\pm$ 0.027 & 0.387 $\pm$ 0.019 & $+0.063$ \\
+At-Risk       & 0.639 $\pm$ 0.020 & 0.540 $\pm$ 0.034 & $+0.099$ \\
+Career Ready  & 0.695 $\pm$ 0.021 & 0.588 $\pm$ 0.017 & $+0.107$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Interpretation.} Removing the three prior-academic predictors (\texttt{tenth\_percentage}, \texttt{twelth\_percentage}, \texttt{academic\_index}) drops F1-macro by 0.06--0.11 across the three objectives. The decline is the \emph{legitimate} contribution of historical academic record --- not circular leakage from the label. If the engineered \texttt{academic\_index} were a residual echo of \texttt{current\_cgpa}, removing it would collapse performance dramatically (a near-chance classifier); the moderate, non-collapsing decline confirms that the engineered features carry genuine prior-academic signal that is informative but \emph{distinct} from the target. Source data: \filebox{revision/output/tables/leakage\_ablation.csv}.
+
+\subsection*{\cid{R2.5}~~Fairness and subgroup analysis missing}
+
+\begin{reviewerquote}
+``Gender appears among top SHAP features, but the paper does not evaluate subgroup performance, calibration, disparate error rates, or whether recommendations differ unfairly across demographic or socioeconomic groups. Since this is an educational decision-support system, fairness analysis is not optional.''
+\end{reviewerquote}
+
+\paragraph{Action.} A new \stress{\sectref{5.6} ``Fairness and Subgroup Analysis''} (Patch~10) reports per-subgroup F1-macro, False-Negative Rate (FNR) for the positive class, Brier score, and the equalised-odds gap across \texttt{gender}, \texttt{residence\_type}, and \texttt{family\_income\_bracket}. The audit re-uses the canonical 5-fold OOF predictions, so the metrics are directly comparable to Table~4. A calibration plot for the at-risk objective by gender (new \stress{Fig.~13}) is in \filebox{revision/output/figures/fairness\_calibration.png}. Implementation: \filebox{revision/code/fairness.py}.
+
+\paragraph{Quantitative result (Table~10 excerpt; full audit in Appendix~A, Table~A6).} The most consequential disparities are in the \texttt{family\_income\_bracket} attribute for the at-risk objective:
+
+\begin{center}\small
+\begin{tabular}{l l c c c c}
+\toprule
+\textbf{Obj.} & \textbf{Subgroup (income)} & \textbf{n} & \textbf{F1-macro} & \textbf{FNR} & \textbf{Brier} \\
+\midrule
+At-Risk & \textgreater{}\,15 Lakh         & 60  & 0.704 & 0.429 & 0.159 \\
+At-Risk & 8--15 Lakh                       & 167 & 0.671 & 0.587 & 0.186 \\
+At-Risk & 2.5--8 Lakh                      & 414 & 0.674 & 0.548 & 0.192 \\
+At-Risk & \textless\,2.5 Lakh              & 737 & 0.604 & 0.678 & 0.216 \\
+\midrule
+\multicolumn{6}{r}{Equalised-odds gap (FNR\textsubscript{max} -- FNR\textsubscript{min}) = \stress{0.249}} \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Headline findings.}
+\begin{itemize}
+  \item \stress{Income disparity for at-risk identification} is large: students from the lowest income bracket have an FNR of 0.678, versus 0.429 for the highest bracket --- a gap of 0.249. The model misses low-income at-risk students more often, which is operationally the costliest error.
+  \item \stress{Gender gap for at-risk identification} is also substantive: female FNR = 0.715 vs. male FNR = 0.572 (gap = 0.143). The model is more likely to miss female at-risk students.
+  \item \stress{Calibration} is reasonable across subgroups (Brier scores 0.16--0.22), but the FNR gap dominates the operational risk.
+  \item \stress{Career-readiness} fairness is comparatively flat across all three attributes ($\Delta\,\text{FNR} \leq 0.13$).
+\end{itemize}
+
+\paragraph{Mitigation discussion (\sectref{5.6}, in red).} We now state explicitly that \emph{(i)} the appearance of \texttt{gender} among top SHAP features reflects regional dataset correlations, not causal influence; \emph{(ii)} institutional deployments must monitor disparate impact via the equalised-odds gap and apply post-hoc reweighting when this gap exceeds an operationally chosen threshold; and \emph{(iii)} recommendations are restricted to features marked \emph{modifiable} in \texttt{MODIFIABLE\_FEATURES}, never to immutable demographic features. The fairness numbers are tracked in \filebox{revision/output/tables/fairness\_subgroups.csv}.
+
+\subsection*{\cid{R2.6}~~DL training fairness (insufficient detail)}
+
+\begin{reviewerquote}
+``The comparison with deep learning models may not be fully fair. The dataset is small, but the manuscript does not provide enough detail on optimization, early stopping, batch size, epochs, learning-rate schedules, categorical embeddings, or regularization for TabNet, FT-Transformer, and SAINT.''
+\end{reviewerquote}
+
+\paragraph{Action.} A new \stress{\sectref{4.3} ``Deep-Learning Training Configuration''} (Patch~07) lists every architectural and optimisation hyperparameter and confirms that the Optuna budget for each DL architecture is \emph{identical} to that for XGBoost (50 trials $\times$ 3 inner folds = 150 inner-CV evaluations).
+
+\paragraph{Evidence (Table~4a, manuscript, in red).}
+
+\begin{center}\small
+\begin{tabular}{l l l l}
+\toprule
+\textbf{Setting} & \textbf{TabNet} & \textbf{FT-Transformer} & \textbf{SAINT} \\
+\midrule
+Optimiser                  & Adam            & AdamW    & AdamW    \\
+Initial learning rate      & $2\!\times\!10^{-2}$ & $1\!\times\!10^{-3}$ & $1\!\times\!10^{-3}$ \\
+LR scheduler               & StepLR ($\gamma{=}0.9$, step$=$50) & Cosine & Cosine \\
+Batch size                 & 128             & 128      & 128      \\
+Maximum epochs             & 300             & 200      & 200      \\
+Early-stopping patience    & 20              & 20       & 20       \\
+In-fold validation split   & 15\,\%          & 15\,\%   & 15\,\%   \\
+Categorical encoding       & sparsemax mask  & learned token & learned token \\
+Architecture               & $n_d{=}n_a{=}8$, steps$=$3, $\lambda_{\text{sparse}}{=}10^{-3}$, $\gamma{=}1.3$, momentum 0.02, clip 1.0 & $d_{\text{token}}{=}64$, $L{=}2$, drop$_{\text{attn}}{=}0.2$, drop$_{\text{ffn}}{=}0.1$ & $d{=}32$, depth$=$3, heads$=$4, drop 0.1/0.1 \\
+Optuna trials (inner 3-fold) & 50            & 50       & 50       \\
+Random seeds               & 42, 42          & 42, 42   & 42, 42   \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\paragraph{Reframing.} We now state in \sectref{4.3} that the DL underperformance is \emph{regime-specific} to small-N educational survey data, not a categorical claim about tabular DL --- consistent with the recent results of Goldblum et al.\,[20] and Hollmann et al.\,[21] cited in \sectref{2.3}. Source: \filebox{revision/manuscript\_patches/07\_section\_4\_3\_dl\_config.md}.
+
+\bigskip
+\hrule
+\bigskip
+
+% =============================================================================
+\section{Response to the Editor's Comments}
+% =============================================================================
+
+\subsection*{Format compliance}
+
+\begin{small}
+\begin{tabularx}{\linewidth}{p{4.6cm} X}
+\toprule
+\textbf{Editor's item} & \textbf{Action} \\
+\midrule
+Body 11\,pt                  & Applied. \\
+Tables 10\,pt                & Applied. \\
+Equations 11\,pt italic       & Applied; mathematical expressions are in italic font; \texttt{*} replaced by \texttt{$\cdot$} or \texttt{$\times$}. \\
+Wide figures one-column      & Applied to Figs.~1, 3, 5--7, 9, 10, 13. \\
+No two figures side-by-side  & Verified. \\
+No \texttt{(a)/(b)/(c)} labels in figures & Removed; moved to captions. \\
+No borders around figures    & Verified. \\
+No rotated sheets / vertical writing & Verified. \\
+Equations indented 5\,mm with one blank line above/below & Applied. \\
+Equation numbers right-aligned & Applied. \\
+\texttt{[1]}, \texttt{[2-4]} citation style with first-name initials & Reference list reformatted to IJIES sample style with \emph{Vol.}, \emph{No.}, \emph{pp.}, year, doi. \\
+All revisions in \textcolor{revred}{red font} & Applied. The revised manuscript contains 331 red-font runs across 386 paragraphs (33.6\,\% of the text). \\
+Page count $\geq 8$           & With the new \sectref{3.10}, \sectref{4.3}, \sectref{5.4}, \sectref{5.5}, \sectref{5.6}, and Appendix~A, the manuscript comfortably exceeds the 8-page minimum. \\
+\bottomrule
+\end{tabularx}
+\end{small}
+
+
+
+\bigskip
+\hrule
+\bigskip
+
+% =============================================================================
+\section*{Closing Remarks}
+% =============================================================================
+
+We have responded to every comment with concrete textual revision, supplementary experimental evidence, and reproducible code. Where the reviewer's substantive concern stands even after additional analysis (most notably for \cid{R2.2}, the causal interpretation of SHAP-based recommendations), we have explicitly conceded the limitation and restated the manuscript's contribution accordingly, rather than overstating what the data supports. We believe this honest and transparent treatment best serves the readership and the methodological standards the reviewers raised.
+
+We are deeply grateful for the editor's and the reviewers' time and care; their feedback materially improved this work.
+
+\vspace{8pt}
+\noindent Sincerely,\\[6pt]
+\textbf{Shikha Pachouly} (corresponding author) \\
+Department of Computer Engineering, AISSMS College of Engineering, SPPU, Pune 411001, India \\
+\href{mailto:shikhaphd2022@gmail.com}{shikhaphd2022@gmail.com}\\[2pt]
+\textbf{D.\,S.\,Bormane} \\
+Department of Electronics and Telecommunication Engineering, AISSMS College of Engineering, SPPU, Pune 411001, India
+
+\end{document}

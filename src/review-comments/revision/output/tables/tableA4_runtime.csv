@@ -1,0 +1,27 @@
+Setting,Value
+Random seed,42
+Outer CV folds,5
+Outer CV class,sklearn.model_selection.StratifiedKFold(shuffle=True)
+Inner CV folds (Optuna),3
+Optuna trials per model,50
+Optuna sampler,TPESampler
+SMOTE k_neighbors,5
+SMOTE random_state,42
+SMOTE applied,Within each training fold only (never on validation/test)
+SHAP background samples,100
+SHAP nsamples (KernelExplainer),1000
+CGPA Low threshold,< 6.5
+CGPA High threshold,>= 8.0
+At-risk CGPA threshold,< 7.0
+Python,3.11.9
+Platform,Windows-10-10.0.21996-SP0
+numpy,1.26.4
+pandas,2.2.3
+scikit-learn,1.5.2
+xgboost,2.1.4
+lightgbm,4.6.0
+shap,0.46.0
+optuna,4.8.0
+torch,2.4.1+cpu
+imbalanced-learn,0.12.4
+matplotlib,3.9.4
