@@ -41,6 +41,12 @@
 \usepackage[colorlinks=true,linkcolor=accentblue,urlcolor=accentblue,
             citecolor=accentblue,pdfborder={0 0 0}]{hyperref}
 
+% Prevent hyphenation and ensure URLs break properly
+\usepackage{url}
+\urlstyle{same}
+\hyphenpenalty=10000
+\exhyphenpenalty=10000
+
 % ---- Shaded boxes for reviewer quotes ---------------------------------------
 \usepackage{tcolorbox}
 \tcbuselibrary{breakable,skins}
@@ -98,7 +104,9 @@
 
 \vspace{4pt}
 \noindent\textbf{Title:}~Explainable AI for Student Success: A Multi-Objective Framework with SHAP-Based Personalized Recommendations.\\
-\textbf{Authors:}~Shikha Pachouly, D. S. Bormane.
+\textbf{Authors:}~Shikha Pachouly, D. S. Bormane.\\
+
+\textbf{Note:}~ All the Changes of Second Revision are highlighted with Yellow Hihglight and Red Font.
 
 \vspace{6pt}
 \hrule
@@ -135,7 +143,7 @@
 0.451 - 0.387 = 0.064
 \]
 
-The correct difference is \stress{0.064}, not 0.063. This is a \stress{calculation error}, not a rounding issue.
+Please Note The table referred in observation 1 is Table 3 not Table 2 so I have Corrected  \stress{Table 3 (Page No 8)} . The correct difference is \stress{0.064}, not 0.063. This is a \stress{calculation error}, not a rounding issue.
 
 \paragraph{Action taken.} The delta value for CGPA Category has been corrected from 0.063 to 0.064 in all instances.
 
@@ -167,7 +175,7 @@ CGPA Category & 0.451 $\pm$ 0.027 & 0.387 $\pm$ 0.019 & \stress{$+0.064$} \\
 
 \paragraph{Issue identification.} The manuscript currently presents workshop participation as the highest-impact intervention based on SHAP values (SHAP = 0.331), but the propensity-score matching (PSM) analysis in Table 10 shows that no acceptable matches were found (n matched = 0), meaning no causal ATT estimate could be computed. This creates a potential misinterpretation where readers might assume the recommendation has causal support when it does not.
 
-\paragraph{Action taken.} The manuscript has been updated to explicitly clarify that the workshop participation recommendation is predictive-only and not supported by causal evidence. The following clarification has been added after stating the positivity violation in \sectref{5.5}. Please refer Page 14.
+\paragraph{Action taken.} The manuscript has been updated to explicitly clarify that the workshop participation recommendation is predictive-only and not supported by causal evidence. The following clarification has been added after stating the positivity violation in  \stress{\sectref{5.5}. Please refer Page 14.}
 
 \begin{itemize}
   \item Added explicit statement: ``Therefore, the SHAP-based recommendation for workshop participation is predictive-only and is not supported by matched causal evidence.''
@@ -188,7 +196,7 @@ CGPA Category & 0.451 $\pm$ 0.027 & 0.387 $\pm$ 0.019 & \stress{$+0.064$} \\
 ``The manuscript reports 1,378 students and class distributions of 8.1\% / 56.2\% / 35.6\% for the CGPA categories. These percentages correspond approximately to 111.6, 774.4, and 490.6 students, respectively, which sum to 1,376.6 rather than 1,378. The authors should clarify whether percentages were rounded or whether the underlying counts differ.''
 \end{reviewerquote}
 
-\paragraph{Verification of actual counts.} The manuscript states in \sectref{5.7} (Statistical conclusion validity) that the Low class has n=112 students. Working backwards from the actual class counts:
+\paragraph{Verification of actual counts.} The manuscript states in \stress{\sectref{5.8}} (Statistical conclusion validity) that the Low class has n=112 students. Working backwards from the actual class counts:
 
 \[
 \text{Low: } n = 112, \quad \frac{112}{1378} = 0.0813 \approx 8.1\%
@@ -207,7 +215,7 @@ CGPA Category & 0.451 $\pm$ 0.027 & 0.387 $\pm$ 0.019 & \stress{$+0.064$} \\
 
 \paragraph{Action taken.} The manuscript is updated to include the actual class counts alongside the percentages to prevent this confusion. The distribution table will be updated to show both the count and percentage for each class.
 
-\paragraph{Evidence } The distribution table -5 ( Page-8) in \sectref{4.1} is updated from:
+\paragraph{Evidence } The distribution \stress{Table -5 ( Page-8) in \sectref{4.1} } is updated from:
 
 \begin{center}\small
 \begin{tabular}{l c}
@@ -258,7 +266,7 @@ CGPA Category & Low: 112 (8.1\%) / Medium: 775 (56.2\%) / High: 491 (35.6\%) \\
 \end{enumerate}
 
 
-\paragraph{Manuscript  addresses fairness of comparison.} The closing paragraph of \sectref{4.3 (Page-9)} explicitly states:
+\paragraph{Manuscript  addresses fairness of comparison.} The closing paragraph of \stress{\sectref{4.3 (Page-9)}}explicitly states:
 
 \begin{evidencebox}
 \noindent \textit{``The Optuna budget for each DL architecture is identical to that for XGBoost (50 trials $\times$ 3 inner folds = 150 inner-CV evaluations), so the gap between XGBoost and the best DL model on this dataset cannot be attributed to under-tuning of the DL architectures. The persistence of that gap (Table 4) is consistent with recent results showing that gradient-boosted trees remain dominant on small tabular data when the ratio of unique feature interactions to sample count is low [20], [21]. We therefore frame the DL underperformance as regime-specific to small-N educational survey data, not as a categorical claim about tabular DL.''}
@@ -281,16 +289,18 @@ CGPA Category & Low: 112 (8.1\%) / Medium: 775 (56.2\%) / High: 491 (35.6\%) \\
 \paragraph{Confirmation.} The manuscript  confirms this. All four conditions are satisfied and updated in the manuscript and the released code:
 
 \begin{enumerate}
-  \item \stress{Identical train/test splits.} \sectref{5.4 (Page-13)} states: ``three representative studies  \ldots\ were re-implemented and evaluated on the present dataset under the same evaluation protocol used for all other models in this study, namely 5-fold stratified cross-validation.'' The code (\filebox{revision/code/common.py}) implements a single canonical \texttt{cv\_iter()} function that returns \texttt{StratifiedKFold(n\_splits=5, shuffle=True, random\_state=42)}, and all SOTA baselines use this same iterator (\filebox{revision/code/sota\_baselines.py}). Code can be referred from the GitHub repository at - https://github.com/shikhapachouly/student-performence-recommondation.
+  \item \stress{Identical train/test splits.} \stress{\sectref{5.4 (Page-13)}} states: ``three representative studies  \ldots\ were re-implemented and evaluated on the present dataset under the same evaluation protocol used for all other models in this study, namely 5-fold stratified cross-validation.'' The code (\filebox{revision/code/common.py}) implements a single canonical \texttt{cv\_iter()} function that returns \texttt{StratifiedKFold(n\_splits=5, shuffle=True, random\_state=42)}, and all SOTA baselines use this same iterator (\filebox{revision/code/sota\_baselines.py}).\\
+  Code can be referred from the GitHub repository at: \\ \url{https://github.com/shikhapachouly/student-performence-recommondation}
 
-  \item \stress{Identical feature availability.} All SOTA baselines receive the same preprocessed feature matrix \texttt{X} via \texttt{load\_preprocessed()} from \filebox{common.py}. No model receives additional features or a reduced feature set --- every model sees the same 48-feature input including engineered composites.Code can be referred from the GitHub repository at - https://github.com/shikhapachouly/student-performence-recommondation.
+  \item \stress{Identical feature availability.} All SOTA baselines receive the same preprocessed feature matrix \texttt{X} via \texttt{load\_preprocessed()} from \filebox{common.py}. No model receives additional features or a reduced feature set --- every model sees the same 48-feature input including engineered composites.\\
+  \stress{Code can be referred from the GitHub repository at:} \\ \url{https://github.com/shikhapachouly/student-performence-recommondation}
 
-  \item \stress{Identical leakage prevention rules.} The leakage controls described in \sectref{3.10 (Page-7)} (dropping 7 target-derived columns, SMOTE on training folds only) are applied globally during preprocessing; all models operate on the resulting leakage-free matrix. The SOTA baselines apply SMOTE within each training fold via the same \texttt{\_smote()} function with \texttt{random\_state=42}.
+  \item \stress{Identical leakage prevention rules.} The leakage controls described in \stress{\sectref{3.10 (Page-7)}} (dropping 7 target-derived columns, SMOTE on training folds only) are applied globally during preprocessing; all models operate on the resulting leakage-free matrix. The SOTA baselines apply SMOTE within each training fold via the same \texttt{\_smote()} function with \texttt{random\_state=42}.
 
   \item \stress{Identical evaluation metrics.} All models are evaluated using F1-macro (\texttt{f1\_score(average="macro")}) across 5 folds, reported as mean $\pm$ standard deviation.
 \end{enumerate}
 
-\paragraph{Explanation of the performance gap.} The manuscript  explains this in \sectref{5.4}(Page-13):
+\paragraph{Explanation of the performance gap.} The manuscript  explains this in \stress{\sectref{5.4}(Page-13):}
 
 \begin{evidencebox}
 \noindent \textit{``Where this work attains a higher F1-macro the gap is consistent with the engineered composite features, not with the choice of classifier (XGBoost on raw features alone falls inside the SOTA band --- see Table 4). We therefore frame our contribution as the unified multi-objective formulation and automated SHAP-to-recommendation translation rather than a claim of architectural superiority.''}
@@ -324,14 +334,14 @@ All baselines call the same \texttt{load\_preprocessed()}, \texttt{cv\_iter()}, 
 ``The GitHub repository should include the following mandatory reproducibility materials: Full preprocessing pipeline, Feature-engineering scripts, Exact train/validation/test fold indices, Optuna search spaces and best hyperparameters, SMOTE configuration, Random seeds, Environment specification (requirements.txt or conda environment), Instructions to reproduce all tables and figures, Either anonymized data or a statistically equivalent synthetic dataset if the original student data cannot be shared due to privacy constraints.''
 \end{reviewerquote}
 
-\paragraph{Repository completeness.} The GitHub repository at \url{https://github.com/shikhapachouly/student-recommondation} \stress{ contains ALL required reproducibility materials}:
+\paragraph{Repository completeness.} The GitHub repository at \url{https://github.com/shikhapachouly/student-performence-recommondation} \stress{ contains ALL required reproducibility materials}:
 
 \paragraph{Reproducible commands and instructions.} The \filebox{README.md } has been updated with explicit command tables for reproducing every manuscript table and figure:
 
 
 \begin{itemize}
   \item \stress{Step-by-step commands table} — Maps each pipeline stage to its command and the manuscript output it generates (Tables~7, 11; Figures~1--9)
-  \item \stress{Revision-specific tables} — Explicit commands for reproducing Table~3 (leakage control), Table~9 (SOTA comparison), Table~10 (PSM analysis), Table~A1 (search spaces), Table~A2 (best hyperparameters), and the fairness audit
+  \item \stress{Revision-specific tables} — Explicit commands for reproducing Table~3 (leakage control), Table~9 (SOTA comparison), Table~10 (PSM analysis), Table~A1 (search spaces), Table~A2 (best hyperparameters), and the fairness audit. Please refer: \\ \url{https://github.com/shikhapachouly/student-performence-recommondation/tree/main/src/review-comments/revision/output/tables}
   \item \stress{Dependencies table} — Lists every package in \filebox{requirements.txt} with its version range and purpose
   \item \stress{Reproducibility guarantees table} — Documents every reproducibility parameter (seed, folds, SMOTE, Optuna config, thresholds) with its value and source file location
   \item \stress{Environment setup} — Both pip and Conda instructions provided
@@ -343,7 +353,7 @@ All baselines call the same \texttt{load\_preprocessed()}, \texttt{cv\_iter()}, 
 
   \item \stress{Full preprocessing pipeline} — \checkmark \filebox{src/data/preprocessor.py} and \filebox{src/pipeline.py}
   \item \stress{Feature-engineering scripts} — \checkmark \filebox{src/data/feature\_engineering.py} with composite scores and interaction features
-  \item \stress{Exact train/validation/test fold indices} — \checkmark Deterministic via \texttt{StratifiedKFold(n\_splits=5, shuffle=True, random\_state=42)} in \filebox{src/models/baselines.py:172} and \filebox{src/review-comments/revision/code/common.py:108}. \\ Same seed guarantees identical splits across all runs.
+  \item \stress{Exact train/validation/test fold indices} — \checkmark Deterministic via \texttt{StratifiedKFold(n\_splits=5, shuffle=True, random\_state=42)} in \filebox{src/models/baselines.py:172} and\\ \filebox{src/review-comments/revision/code/common.py:108}. \\ Same seed guarantees identical splits across all runs.
   \item \stress{Optuna search spaces} — \checkmark \filebox{src/config.py:352--430} defines \texttt{OPTUNA\_SEARCH\_SPACES} for all 7 models
   \item \stress{Best hyperparameters} — \checkmark Generated by \filebox{src/models/baselines.py:191} and retrievable via \filebox{src/review-comments/revision/code/replication\_tables.py:72--99}
   \item \stress{SMOTE configuration} — \checkmark \filebox{src/models/baselines.py:181} with \texttt{SMOTE(random\_state=42)}, applied within training folds only
